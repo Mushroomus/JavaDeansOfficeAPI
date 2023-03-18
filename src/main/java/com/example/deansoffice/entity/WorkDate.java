@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name="work_date")
@@ -27,4 +28,7 @@ public class WorkDate {
     @ManyToOne
     @JoinColumn(name = "worker_id", referencedColumnName = "id")
     private Worker worker;
+
+    @OneToMany(mappedBy = "workDate")
+    private List<WorkDateIntervals> workDateIntervals;
 }

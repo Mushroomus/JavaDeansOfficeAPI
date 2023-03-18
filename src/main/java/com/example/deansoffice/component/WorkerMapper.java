@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 public class WorkerMapper {
     private final ModelMapper modelMapper;
 
-    public WorkerMapper(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public WorkerMapper(WorkerMapperConverter workerMapperConverter) {
+        modelMapper = new ModelMapper();
+        modelMapper.addConverter(workerMapperConverter);
     }
 
     public WorkerDTO toDto(Worker worker) {
