@@ -5,9 +5,14 @@ import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
 import com.example.deansoffice.entity.Worker;
+import com.example.deansoffice.exception.ErrorResponse;
+import com.example.deansoffice.exception.IntervalNotFoundException;
+import com.example.deansoffice.exception.WorkDateNotFoundException;
+import com.example.deansoffice.exception.WorkerNotFoundException;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import com.example.deansoffice.service.WorkDateService;
 import com.example.deansoffice.service.WorkerService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,8 +74,6 @@ public class WorkerController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 
-            System.out.println(appointmentDate);
-
             LocalTime appointmentTime = LocalTime.parse(time);
 
             // Find the WorkDate corresponding to the appointment date
@@ -79,10 +82,6 @@ public class WorkerController {
                     .findFirst();
 
             if (workDate.isPresent()) {
-                System.out.println(appointmentTime);
-                // Find the WorkDateInterval corresponding to the appointment time
-
-                System.out.println(workDate.get().getId());
                 workDate.get().getWorkDateIntervals().stream().forEach(i -> System.out.println(i.getStartInterval()));
 
                 Optional<WorkDateIntervals> workDateInterval = workDate.get().getWorkDateIntervals().stream()
@@ -99,13 +98,13 @@ public class WorkerController {
 
                     return ResponseEntity.ok("Appointment made successfully.");
                 } else {
-                    return ResponseEntity.notFound().build();
+                    throw new IntervalNotFoundException();
                 }
             } else {
-                return ResponseEntity.notFound().build();
+                throw new WorkDateNotFoundException();
             }
         } else {
-            return ResponseEntity.notFound().build();
+            throw new WorkerNotFoundException();
         }
     }
 }
