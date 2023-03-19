@@ -1,9 +1,9 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.serviceimplementation;
 
-import com.example.deansoffice.dao.WorkDateDAO;
 import com.example.deansoffice.dao.WorkDateIntervalsDAO;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
+import com.example.deansoffice.service.WorkDateIntervalsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

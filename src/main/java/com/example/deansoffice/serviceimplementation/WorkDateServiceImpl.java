@@ -1,18 +1,18 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.WorkDateDAO;
 import com.example.deansoffice.dao.WorkDateIntervalsDAO;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.Worker;
+import com.example.deansoffice.service.WorkDateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 @Service
-public class WorkDateServiceImpl implements  WorkDateService {
+public class WorkDateServiceImpl implements WorkDateService {
     private WorkDateDAO workDateDAO;
 
     private WorkDateIntervalsDAO workDateIntervalsDAO;

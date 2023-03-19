@@ -5,14 +5,12 @@ import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
 import com.example.deansoffice.entity.Worker;
-import com.example.deansoffice.exception.ErrorResponse;
 import com.example.deansoffice.exception.IntervalNotFoundException;
 import com.example.deansoffice.exception.WorkDateNotFoundException;
 import com.example.deansoffice.exception.WorkerNotFoundException;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import com.example.deansoffice.service.WorkDateService;
 import com.example.deansoffice.service.WorkerService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +39,6 @@ public class WorkerController {
     @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<List<WorkerDTO>> getWorkers() {
         List<WorkerDTO> workersDTO = workerService.getWorkers();
-        System.out.println("Done Request");
         return ResponseEntity.ok(workersDTO);
     }
 
@@ -54,14 +51,8 @@ public class WorkerController {
             workDateIntervalsService.createIntervals(workDate, 10);
             return ResponseEntity.ok("Work day saved");
         } else {
-            return ResponseEntity.notFound().build();
+            throw new WorkerNotFoundException();
         }
-    }
-
-    @GetMapping("/{id}/workdays/{year}/{month}")
-    public ResponseEntity<List<Integer>> getWorkDaysForMonthAndYear(@PathVariable int id, @PathVariable int year, @PathVariable int month) {
-        List<Integer> workDays = workerService.getWorkDaysForMonthAndYear(id, year, month);
-        return ResponseEntity.ok(workDays);
     }
 
     @PutMapping("/{id}/workdays/{date}/interval/{time}")
@@ -76,24 +67,19 @@ public class WorkerController {
 
             LocalTime appointmentTime = LocalTime.parse(time);
 
-            // Find the WorkDate corresponding to the appointment date
             Optional<WorkDate> workDate = worker.get().getWorkDates().stream()
                     .filter(d -> d.getDate().equals(appointmentDate))
                     .findFirst();
 
             if (workDate.isPresent()) {
-                workDate.get().getWorkDateIntervals().stream().forEach(i -> System.out.println(i.getStartInterval()));
+                workDate.get().getWorkDateIntervals().forEach(i -> System.out.println(i.getStartInterval()));
 
                 Optional<WorkDateIntervals> workDateInterval = workDate.get().getWorkDateIntervals().stream()
                         .filter(i -> i.getStartInterval().equals(appointmentTime))
                         .findFirst();
 
                 if (workDateInterval.isPresent()) {
-                    // Update the taken attribute
-                    System.out.println("Time found");
                     workDateInterval.get().setTaken(true);
-
-                    // Save the changes
                     workDateIntervalsService.saveWorkDateInterval(workDateInterval.get());
 
                     return ResponseEntity.ok("Appointment made successfully.");

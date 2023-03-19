@@ -1,6 +1,7 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.SpecializationDAO;
+import com.example.deansoffice.service.SpecializationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

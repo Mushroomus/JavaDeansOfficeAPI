@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface WorkerService {
     List<WorkerDTO> getWorkers();
     Optional<Worker> getWorkerById(int id);
-    List<Integer> getWorkDaysForMonthAndYear(int workerId, int year, int month);
 }
