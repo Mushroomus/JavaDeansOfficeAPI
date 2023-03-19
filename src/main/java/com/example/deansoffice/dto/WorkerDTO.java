@@ -18,5 +18,4 @@ public class WorkerDTO {
     private String room;
     private List<WorkDate> workDates;
     private List<Specialization> specializations;
-
 }

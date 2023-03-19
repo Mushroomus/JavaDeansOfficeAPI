@@ -22,7 +22,14 @@ public class WorkDateIntervals {
     @Column(name="taken")
     private Boolean taken;
 
+    @Column(name="description")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "work_date_id", referencedColumnName = "id")
     private WorkDate workDate;
+
+    @ManyToOne
+    @JoinColumn(name = "student_id", referencedColumnName = "id")
+    private Student student;
 }

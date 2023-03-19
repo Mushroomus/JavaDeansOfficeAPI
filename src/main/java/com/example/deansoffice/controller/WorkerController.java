@@ -6,19 +6,24 @@ import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
 import com.example.deansoffice.entity.Worker;
 import com.example.deansoffice.exception.IntervalNotFoundException;
+import com.example.deansoffice.exception.StudentNotFoundException;
 import com.example.deansoffice.exception.WorkDateNotFoundException;
 import com.example.deansoffice.exception.WorkerNotFoundException;
+import com.example.deansoffice.service.StudentService;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import com.example.deansoffice.service.WorkDateService;
 import com.example.deansoffice.service.WorkerService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.deansoffice.entity.Student;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -26,13 +31,14 @@ import java.util.Optional;
 public class WorkerController {
     private WorkerService workerService;
     private WorkDateService workDateService;
-
     private WorkDateIntervalsService workDateIntervalsService;
+    private StudentService studentService;
 
-    public WorkerController(WorkerService theWorkerService, WorkDateService theWorkDateService, WorkDateIntervalsService theWorkDateIntervalsService) {
+    public WorkerController(WorkerService theWorkerService, WorkDateService theWorkDateService, WorkDateIntervalsService theWorkDateIntervalsService, StudentService theStudentService) {
         workerService = theWorkerService;
         workDateService = theWorkDateService;
         workDateIntervalsService = theWorkDateIntervalsService;
+        studentService = theStudentService;
     }
 
     @GetMapping("")
@@ -55,8 +61,15 @@ public class WorkerController {
         }
     }
 
-    @PutMapping("/{id}/workdays/{date}/interval/{time}")
-    public ResponseEntity<String> makeAppointment(@PathVariable int id, @PathVariable long date, @PathVariable String time) {
+    @PutMapping("/{id}/workdays/{date}/interval/{time}/student/{student_id}")
+    @Transactional
+    public ResponseEntity<String> makeAppointment(@PathVariable int id, @PathVariable long date, @PathVariable String time, @PathVariable int student_id, @RequestBody(required = false) Map<String, String> descriptionBody) {
+
+        Optional<Student> student = studentService.getStudentById(student_id);
+
+        if(!student.isPresent())
+            throw new StudentNotFoundException();
+
         Optional<Worker> worker = workerService.getWorkerById(id);
 
         if (worker.isPresent()) {
@@ -79,7 +92,14 @@ public class WorkerController {
                         .findFirst();
 
                 if (workDateInterval.isPresent()) {
-                    workDateInterval.get().setTaken(true);
+                    WorkDateIntervals interval = workDateInterval.get();
+
+                    interval.setTaken(true);
+                    interval.setStudent(student.get());
+
+                    if(descriptionBody != null)
+                        interval.setDescription(descriptionBody.get("description"));
+
                     workDateIntervalsService.saveWorkDateInterval(workDateInterval.get());
 
                     return ResponseEntity.ok("Appointment made successfully.");
