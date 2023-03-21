@@ -34,7 +34,7 @@ public class Student {
             joinColumns = { @JoinColumn(name = "student_id") },
             inverseJoinColumns = { @JoinColumn(name = "major_details_id") }
     )
-    private List<MajorDetails> majorDetailsList;
+    private List<MajorYear> majorYearList;
 
     @OneToMany(mappedBy = "student")
     private List<WorkDateIntervals> appointments;

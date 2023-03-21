@@ -1,10 +1,9 @@
 package com.example.deansoffice.dto;
 
-import com.example.deansoffice.entity.MajorDetails;
+import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.WorkDateIntervals;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -17,6 +16,6 @@ public class StudentDTO {
     private String name;
     private String surname;
     private Boolean isActive;
-    private List<MajorDetails> majorDetailsList;
+    private List<MajorYear> majorYearList;
     private List<WorkDateIntervals> appointments;
 }

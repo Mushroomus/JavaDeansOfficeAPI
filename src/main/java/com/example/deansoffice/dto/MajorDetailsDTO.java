@@ -1,7 +1,6 @@
 package com.example.deansoffice.dto;
 
-import com.example.deansoffice.entity.MajorDetails;
-import com.example.deansoffice.entity.Student;
+import com.example.deansoffice.entity.Specialization;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.List;
 @Data
 public class MajorDetailsDTO {
     private int id;
-    private String major;
-    private String specialization;
     private int year;
+    private List<Specialization> specializations;
 }

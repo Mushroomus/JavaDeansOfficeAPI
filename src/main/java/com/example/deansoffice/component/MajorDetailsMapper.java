@@ -2,7 +2,7 @@ package com.example.deansoffice.component;
 
 import com.example.deansoffice.dao.MajorDetailsDAO;
 import com.example.deansoffice.dto.MajorDetailsDTO;
-import com.example.deansoffice.entity.MajorDetails;
+import com.example.deansoffice.entity.MajorYear;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -16,15 +16,15 @@ public class MajorDetailsMapper {
         this.modelMapper = modelMapper;
     }
 
-    public MajorDetailsDTO toDto(MajorDetails majorDetails) {
-        return modelMapper.map(majorDetails, MajorDetailsDTO.class);
+    public MajorDetailsDTO toDto(MajorYear majorYear) {
+        return modelMapper.map(majorYear, MajorDetailsDTO.class);
     }
 
-    public MajorDetails toEntity(MajorDetailsDAO majorDetailsDAO) {
-        return modelMapper.map(majorDetailsDAO, MajorDetails.class);
+    public MajorYear toEntity(MajorDetailsDAO majorDetailsDAO) {
+        return modelMapper.map(majorDetailsDAO, MajorYear.class);
     }
 
-    public List<MajorDetailsDTO> toDTOList(List<MajorDetails> majorDetails) {
+    public List<MajorDetailsDTO> toDTOList(List<MajorYear> majorDetails) {
         return majorDetails.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
