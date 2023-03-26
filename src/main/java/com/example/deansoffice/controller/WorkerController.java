@@ -2,23 +2,18 @@ package com.example.deansoffice.controller;
 
 import com.example.deansoffice.dto.NewWorkDayRequest;
 import com.example.deansoffice.dto.WorkerDTO;
-import com.example.deansoffice.entity.WorkDate;
-import com.example.deansoffice.entity.WorkDateIntervals;
-import com.example.deansoffice.entity.Worker;
+import com.example.deansoffice.entity.*;
 import com.example.deansoffice.exception.IntervalNotFoundException;
 import com.example.deansoffice.exception.StudentNotFoundException;
 import com.example.deansoffice.exception.WorkDateNotFoundException;
 import com.example.deansoffice.exception.WorkerNotFoundException;
-import com.example.deansoffice.service.StudentService;
-import com.example.deansoffice.service.WorkDateIntervalsService;
-import com.example.deansoffice.service.WorkDateService;
-import com.example.deansoffice.service.WorkerService;
+import com.example.deansoffice.model.RegisterStudent;
+import com.example.deansoffice.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.deansoffice.entity.Student;
 
 import java.time.Instant;
 import java.time.LocalDate;

@@ -11,11 +11,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StudentDTO {
     int id;
-    private String email;
-    private String password;
     private String name;
     private String surname;
-    private Boolean isActive;
     private List<MajorYear> majorYearList;
     private List<WorkDateIntervals> appointments;
 }
