@@ -4,6 +4,7 @@ import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
 import com.example.deansoffice.entity.StudentMajorDetails;
 import com.example.deansoffice.model.RegisterStudent;
+import com.example.deansoffice.model.Role;
 import com.example.deansoffice.service.SpecializationMajorYearService;
 import com.example.deansoffice.service.SpecializationService;
 import com.example.deansoffice.service.StudentMajorDetailsService;
@@ -45,7 +46,7 @@ public class StudentController {
         student.setName(registerStudent.getName());
         student.setSurname(registerStudent.getSurname());
 
-        studentService.addStudent(student, registerStudent.getUsername(), registerStudent.getPassword());
+        studentService.addStudent(student, registerStudent.getUsername(), registerStudent.getPassword(), Role.USER);
 
         Integer specializationId = specializationService.findBySpecializationByNameAndCourse(registerStudent.getMajor(), registerStudent.getSpecialization()).getId();
 

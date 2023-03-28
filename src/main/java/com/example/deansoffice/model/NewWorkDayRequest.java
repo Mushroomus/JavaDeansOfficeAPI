@@ -1,4 +1,4 @@
-package com.example.deansoffice.dto;
+package com.example.deansoffice.model;
 
 import lombok.Data;
 

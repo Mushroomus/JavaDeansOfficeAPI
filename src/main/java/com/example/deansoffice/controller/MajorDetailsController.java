@@ -5,6 +5,7 @@ import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.service.MajorDetailsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ public class MajorDetailsController {
     }
 
     @GetMapping("")
+    @CrossOrigin(origins = "http://localhost:3000")
     private ResponseEntity<Map<String,List<MajorDetailsDTO>>> getAllMajors(@RequestParam(name="year", required = false) String year) {
         Map<String,List<MajorDetailsDTO>> result = new HashMap<>(1);
 
