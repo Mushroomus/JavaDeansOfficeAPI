@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif;">
+    <div style="background-color: #f5f5f5; padding: 20px;">
+        <div style="background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.25);">
+            <h1 style="color: #0085CA;">Dean's Office</h1>
+            <hr style="border: 1px solid #f5f5f5;">
+
+            <h2>Appointment Cancellation</h2>
+            <p>Dear <span th:text="${studentNameAndSurname}"></span>,</p>
+            <p>We apologize, but your appointment on <span th:text="${cancelDate}"></span>  at <span th:text="${cancelInterval}"></span> has been cancelled. We are sorry for any inconvenience this may have caused.</p>
+
+            <hr style="border: 1px solid #f5f5f5;">
+            <p style="color: #888888;">Best regards,<br>Dean's Office</p>
+        </div>
+    </div>
+</body>
+</html>

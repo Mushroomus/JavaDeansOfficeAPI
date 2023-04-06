@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 
 @Service
 public class WorkDateServiceImpl implements WorkDateService {
@@ -32,5 +33,10 @@ public class WorkDateServiceImpl implements WorkDateService {
 
         workDateDAO.save(workDate);
         return workDate;
+    }
+
+    @Override
+    public Optional<WorkDate> findWorkDateById(Integer workDateId) {
+        return workDateDAO.findById(workDateId);
     }
 }

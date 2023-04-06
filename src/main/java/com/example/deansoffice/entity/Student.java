@@ -35,4 +35,7 @@ public class Student {
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private List<WorkDateIntervals> appointments;
+
+    @OneToOne(mappedBy = "student")
+    private Login login;
 }
