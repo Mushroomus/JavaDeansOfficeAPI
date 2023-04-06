@@ -46,7 +46,6 @@ public class AuthenticationService {
     studentMajorDetailsService.addStudentMajorDetails(studentMajorDetails);
 
     var jwtToken = jwtService.generateToken(login);
-    System.out.println(jwtToken);
     saveLoginToken(login, jwtToken);
 
     return AuthenticationResponse.builder()

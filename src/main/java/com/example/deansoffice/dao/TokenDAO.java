@@ -11,11 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TokenDAO extends JpaRepository<Token, Integer> {
 
-  @Query(value = """
-      select t from Token t inner join Login u\s
-      on t.login.id = u.id\s
-      where u.id = :id and (t.expired = false or t.revoked = false)\s
-      """)
+  @Query("select t from Token t inner join Login u on t.login.id = u.id where u.id = :id and (t.expired = false or t.revoked = false)")
   List<Token> findAllValidTokenByUser(Integer id);
 
   Optional<Token> findByToken(String token);

@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalTime;
-import java.util.List;
 
 @Entity
-@Table(name="work_date_intervals")
+@Table(name="canceled_appointments")
 @Data
-public class WorkDateIntervals {
+public class CanceledAppointments {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -19,9 +19,6 @@ public class WorkDateIntervals {
 
     @Column(name="end_interval")
     private LocalTime endInterval;
-
-    @Column(name="taken")
-    private Boolean taken;
 
     @Column(name="description")
     private String description;
