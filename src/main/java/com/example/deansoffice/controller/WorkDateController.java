@@ -6,9 +6,11 @@ import com.example.deansoffice.service.EmailService;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import com.example.deansoffice.service.WorkDateService;
 import jakarta.mail.MessagingException;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -32,31 +34,44 @@ public class WorkDateController {
     public ResponseEntity<String> deleteListOfWorkDates(@RequestBody List<Integer> workDatesListId) {
 
         if(workDatesListId != null) {
-            workDatesListId.forEach( (workDateId) -> {
-                    Optional<WorkDate> workDate = workDateService.findWorkDateById(workDateId);
-                    if(workDate.isPresent()) {
-                        WorkDate workDateDelete = workDate.get();
-                        workDateDelete.getWorkDateIntervals().forEach((interval) -> {
-
-                            if(interval.getTaken()) {
-                                Map<String, Object> model = new HashMap<>();
-                                model.put("studentNameAndSurname", interval.getStudent().getName() + " " + interval.getStudent().getSurname());
-                                model.put("cancelDate", workDateDelete.getDate());
-                                model.put("cancelInterval", interval.getStartInterval() + " - " + interval.getEndInterval());
-
-                                try {
-                                    emailService.sendEmail(interval.getStudent().getLogin().getUsername(), "Appointment cancellation", model);
-                                } catch (MessagingException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                            // add canceled interval with description
-                            // delete interval
-                        });
-                    }
-            });
+            workDatesListId.forEach(this::delete);
             return ResponseEntity.ok("Work days deleted");
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteWorkDate(@PathVariable int id) {
+        if(delete(id) == 200)
+            return ResponseEntity.ok("Work day deleted");
+        else
+            return ResponseEntity.notFound().build();
+    }
+
+    private Integer delete(Integer workDateId) {
+        Optional<WorkDate> workDate = workDateService.findWorkDateById(workDateId);
+        if(workDate.isPresent()) {
+            WorkDate workDateDelete = workDate.get();
+            workDateDelete.getWorkDateIntervals().forEach((interval) -> {
+
+                if(interval.getTaken()) {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("studentNameAndSurname", interval.getStudent().getName() + " " + interval.getStudent().getSurname());
+                    model.put("cancelDate", workDateDelete.getDate());
+                    model.put("cancelInterval", interval.getStartInterval() + " - " + interval.getEndInterval());
+
+                    try {
+                        emailService.sendEmail(interval.getStudent().getLogin().getUsername(), "Appointment cancellation", model);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                // add canceled interval with description
+                // delete interval
+            });
+            return 200;
+        } else {
+            return 401;
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.example.deansoffice.dao.WorkDateIntervalsDAO;
 import com.example.deansoffice.entity.CanceledAppointments;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
+import com.example.deansoffice.model.Pair;
 import com.example.deansoffice.service.LocalTimeFormatter;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,5 +104,15 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService {
         } catch (DateTimeParseException e) {
             return  ResponseEntity.badRequest().build();
         }
+    }
+
+    @Override
+    public Optional<WorkDateIntervals> findWorkDateIntervalById(Integer workDateIntervalId) {
+        return workDateIntervalsDAO.findById(workDateIntervalId);
+    }
+
+    @Override
+    public List<Pair<LocalTime, LocalTime>> getIntervalsByWorkerIdAndWorkDateId(int workerId, int workDateId) {
+        return workDateIntervalsDAO.getIntervalsByWorkerIdAndDate(workerId, workDateId);
     }
 }
