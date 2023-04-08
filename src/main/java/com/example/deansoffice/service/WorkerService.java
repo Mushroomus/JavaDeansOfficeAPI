@@ -11,4 +11,8 @@ import java.util.Optional;
 public interface WorkerService {
     List<WorkerDTO> getWorkers();
     Optional<Worker> getWorkerById(int id);
+
+    void saveWorker(Worker worker);
+
+    void addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList);
 }

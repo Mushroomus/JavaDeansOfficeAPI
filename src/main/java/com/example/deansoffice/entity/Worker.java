@@ -1,13 +1,16 @@
 package com.example.deansoffice.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name="worker")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Worker {
 
     @Id
@@ -41,4 +44,6 @@ public class Worker {
     )
     private List<Specialization> specializations;
 
+    @OneToOne(mappedBy = "worker")
+    private Login login;
 }

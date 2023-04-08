@@ -2,10 +2,7 @@ package com.example.deansoffice.entity;
 
 import com.example.deansoffice.model.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,13 +11,14 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name="login_student")
+@Table(name="login")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Login implements UserDetails {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name="username")
     private String username;
@@ -33,9 +31,12 @@ public class Login implements UserDetails {
     private Role role;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "student_id")
     private Student student;
+
+    @OneToOne
+    @JoinColumn(name = "worker_id")
+    private Worker worker;
 
     @OneToMany(mappedBy = "login")
     private List<Token> tokens;

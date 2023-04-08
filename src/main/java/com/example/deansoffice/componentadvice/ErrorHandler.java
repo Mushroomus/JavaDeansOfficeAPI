@@ -15,7 +15,7 @@ public class ErrorHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({WorkerNotFoundException.class, WorkDateNotFoundException.class, IntervalNotFoundException.class, UserNotFoundException.class, StudentNotFoundException.class})
+    @ExceptionHandler({WorkerNotFoundException.class, WorkDateNotFoundException.class, IntervalNotFoundException.class, UserNotFoundException.class, StudentNotFoundException.class, SpecializationNotFoundException.class})
     public ResponseEntity<Object> handleWorkerNotFoundException(Exception ex) {
         String message = ex.getMessage();
         ErrorResponse errorResponse = new ErrorResponse(message);

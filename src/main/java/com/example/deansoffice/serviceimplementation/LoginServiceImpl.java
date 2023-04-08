@@ -21,4 +21,9 @@ public class LoginServiceImpl implements LoginService {
     public Optional<Login> findByUsername(String username) {
         return loginDAO.findByUsername(username);
     }
+
+    @Override
+    public void saveLogin(Login workerLogin) {
+        loginDAO.save(workerLogin);
+    }
 }

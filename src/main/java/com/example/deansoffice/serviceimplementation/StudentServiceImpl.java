@@ -30,6 +30,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Login addStudent(Student student, String username, String password, Role role) {
         studentDAO.save(student);
+        System.out.println(student);
 
         Login login = new Login();
         login.setUsername(username);
