@@ -3,10 +3,10 @@ package com.example.deansoffice.controller;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.Worker;
 import com.example.deansoffice.model.Role;
-import com.example.deansoffice.service.LoginService;
-import com.example.deansoffice.service.PasswordGenerator;
-import com.example.deansoffice.service.SpecializationMajorYearService;
-import com.example.deansoffice.service.WorkerService;
+import com.example.deansoffice.service.*;
+import com.example.deansoffice.service.LoginAuthenticationJWT.LoginService;
+import com.example.deansoffice.service.Utils.PasswordGenerator;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,16 +30,19 @@ public class AdminController {
     private SpecializationMajorYearService specializationMajorYearService;
     private PasswordGenerator passwordGenerator;
 
-    AdminController(@Qualifier("workerServiceImpl") WorkerService theWorkerService, @Qualifier("loginServiceImpl") LoginService theLoginService, @Qualifier("specializationMajorYearServiceImpl") SpecializationMajorYearService theSpecializationMajorYearService, PasswordGenerator thePasswordGenerator) {
+    private EmailService emailService;
+
+    AdminController(@Qualifier("workerServiceImpl") WorkerService theWorkerService, @Qualifier("loginServiceImpl") LoginService theLoginService, @Qualifier("specializationMajorYearServiceImpl") SpecializationMajorYearService theSpecializationMajorYearService, PasswordGenerator thePasswordGenerator, EmailService theEmailService) {
         workerService = theWorkerService;
         loginService = theLoginService;
         specializationMajorYearService = theSpecializationMajorYearService;
         passwordGenerator = thePasswordGenerator;
+        emailService = theEmailService;
     }
 
     // add logger to mark what admin done
     @PostMapping("/{adminId}/worker")
-    public ResponseEntity<Map<String,String>> createWorker(@PathVariable("adminId") int adminId, @RequestBody Worker newWorker) {
+    public ResponseEntity<Map<String,String>> createWorker(@PathVariable("adminId") int adminId, @RequestBody Worker newWorker) throws MessagingException {
         Worker worker = Worker.builder()
                 .name(newWorker.getName())
                 .surname(newWorker.getSurname())
@@ -56,7 +59,12 @@ public class AdminController {
             String generatedPassword = passwordGenerator.generateRandomPassword();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             String hashedPassword = passwordEncoder.encode(generatedPassword);
-            System.out.println(generatedPassword);
+
+
+            Map<String, Object> model = new HashMap<>();
+            model.put("workerNameAndSurname", worker.getName() + " " + worker.getSurname());
+            model.put("password", generatedPassword);
+            emailService.sendEmail(worker.getEmail(), "New worker account created", model, "worker-password");
 
             Login workerLogin = Login.builder()
                             .worker(worker)

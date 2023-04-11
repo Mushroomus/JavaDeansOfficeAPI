@@ -2,7 +2,7 @@ package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.TokenDAO;
 import com.example.deansoffice.entity.Token;
-import com.example.deansoffice.service.TokenService;
+import com.example.deansoffice.service.LoginAuthenticationJWT.TokenService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

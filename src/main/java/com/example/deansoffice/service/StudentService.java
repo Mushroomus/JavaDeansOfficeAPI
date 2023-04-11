@@ -10,5 +10,4 @@ import java.util.Optional;
 @Service
 public interface StudentService {
     Login addStudent(Student student, String username, String password, Role role);
-    Optional<Student> getStudentById(int id);
 }

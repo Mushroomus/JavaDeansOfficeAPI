@@ -20,7 +20,7 @@ public class EmailService {
     @Autowired
     private SpringTemplateEngine templateEngine;
 
-    public void sendEmail(String toEmail, String subject, Map<String, Object> model) throws MessagingException {
+    public void sendEmail(String toEmail, String subject, Map<String, Object> model, String template) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
 
@@ -30,7 +30,7 @@ public class EmailService {
 
         Context context = new Context();
         context.setVariables(model);
-        String html = templateEngine.process("cancel-appointment", context);
+        String html = templateEngine.process(template, context);
 
         mimeMessage.setContent(html, "text/html");
         javaMailSender.send(mimeMessage);

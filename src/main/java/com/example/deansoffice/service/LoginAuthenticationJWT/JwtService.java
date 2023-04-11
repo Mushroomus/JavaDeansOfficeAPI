@@ -1,4 +1,4 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.service.LoginAuthenticationJWT;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -5,6 +5,7 @@ import com.example.deansoffice.dao.StudentDAO;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.Student;
 import com.example.deansoffice.model.Role;
+import com.example.deansoffice.service.Fetcher.StudentFetcher;
 import com.example.deansoffice.service.StudentService;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import com.example.deansoffice.dao.LoginDAO;
 import java.util.Optional;
 
 @Service
-public class StudentServiceImpl implements StudentService {
+public class StudentServiceImpl implements StudentService, StudentFetcher {
     private StudentDAO studentDAO;
     private LoginDAO loginDAO;
 

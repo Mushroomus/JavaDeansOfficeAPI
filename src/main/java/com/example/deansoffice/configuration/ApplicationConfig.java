@@ -1,6 +1,6 @@
 package com.example.deansoffice.configuration;
 
-import com.example.deansoffice.service.LoginService;
+import com.example.deansoffice.service.LoginAuthenticationJWT.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

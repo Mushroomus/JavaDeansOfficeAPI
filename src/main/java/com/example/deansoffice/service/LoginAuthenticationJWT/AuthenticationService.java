@@ -1,11 +1,11 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.service.LoginAuthenticationJWT;
 
-import com.example.deansoffice.dao.TokenDAO;
 import com.example.deansoffice.entity.*;
 import com.example.deansoffice.model.AuthenticationResponse;
 import com.example.deansoffice.model.RegisterStudent;
 import com.example.deansoffice.model.Role;
 import com.example.deansoffice.model.TokenType;
+import com.example.deansoffice.service.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;

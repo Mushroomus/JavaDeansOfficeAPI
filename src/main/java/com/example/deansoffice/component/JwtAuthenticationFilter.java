@@ -1,7 +1,7 @@
 package com.example.deansoffice.component;
 
 import com.example.deansoffice.dao.TokenDAO;
-import com.example.deansoffice.service.JwtService;
+import com.example.deansoffice.service.LoginAuthenticationJWT.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

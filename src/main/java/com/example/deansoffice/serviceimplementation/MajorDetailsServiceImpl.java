@@ -5,13 +5,17 @@ import com.example.deansoffice.dao.MajorDetailsDAO;
 import com.example.deansoffice.dto.MajorDetailsDTO;
 import com.example.deansoffice.service.MajorDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MajorDetailsServiceImpl implements MajorDetailsService {
-    private MajorDetailsDAO majorDetailsDAO;
+    private final MajorDetailsDAO majorDetailsDAO;
+
     @Autowired
     private MajorDetailsMapper majorDetailsMapper;
 
@@ -20,13 +24,24 @@ public class MajorDetailsServiceImpl implements MajorDetailsService {
         majorDetailsDAO = theMajorDetailsDAO;
     }
 
-    @Override
-    public List<MajorDetailsDTO> getAllMajors() {
+    private List<MajorDetailsDTO> getAllMajors() {
         return  majorDetailsMapper.toDTOList(majorDetailsDAO.findAll());
     }
 
-    @Override
-    public List<MajorDetailsDTO> getMajorsByYear(int year) {
+
+    private List<MajorDetailsDTO> getMajorsByYear(int year) {
         return  majorDetailsMapper.toDTOList(majorDetailsDAO.findAllByYear(year));
+    }
+
+    @Override
+    public ResponseEntity<Map<String,List<MajorDetailsDTO>>> getAllMajors(Integer year) {
+        Map<String,List<MajorDetailsDTO>> result = new HashMap<>(1);
+
+        if(year != null)
+            result.put("majors", getMajorsByYear(year));
+        else
+            result.put("majors", getAllMajors());
+
+        return ResponseEntity.ok().body(result);
     }
 }

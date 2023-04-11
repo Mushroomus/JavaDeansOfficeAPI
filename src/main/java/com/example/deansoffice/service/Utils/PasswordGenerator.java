@@ -1,4 +1,4 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.service.Utils;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;

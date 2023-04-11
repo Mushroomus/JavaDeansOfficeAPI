@@ -1,4 +1,4 @@
-package com.example.deansoffice.service;
+package com.example.deansoffice.service.LoginAuthenticationJWT;
 
 import com.example.deansoffice.dao.TokenDAO;
 import jakarta.servlet.http.HttpServletRequest;

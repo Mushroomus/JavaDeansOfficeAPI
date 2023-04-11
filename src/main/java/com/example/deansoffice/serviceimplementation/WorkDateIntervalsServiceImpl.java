@@ -1,16 +1,21 @@
 package com.example.deansoffice.serviceimplementation;
 
-import com.example.deansoffice.dao.CanceledAppointmentsDAO;
 import com.example.deansoffice.dao.WorkDateIntervalsDAO;
 import com.example.deansoffice.entity.CanceledAppointments;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
 import com.example.deansoffice.model.Pair;
-import com.example.deansoffice.service.LocalTimeFormatter;
+import com.example.deansoffice.service.EmailService;
+import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
+import com.example.deansoffice.service.Manager.WorkDateIntervalsCanceledAppointmentsManager;
+import com.example.deansoffice.service.Manager.WorkerWorkDateIntervalsManager;
+import com.example.deansoffice.service.Utils.LocalTimeFormatter;
 import com.example.deansoffice.service.WorkDateIntervalsService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,14 +23,16 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
-public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService {
+public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, WorkerWorkDateIntervalsManager, StudentWorkDateIntervalsManager {
     private WorkDateIntervalsDAO workDateIntervalsDAO;
-    private CanceledAppointmentsDAO canceledAppointmentsDAO;
+    private WorkDateIntervalsCanceledAppointmentsManager workDateIntervalsCanceledAppointmentsManager;
+    private EmailService emailService;
 
     @Autowired
-    public WorkDateIntervalsServiceImpl(WorkDateIntervalsDAO theWorkDateIntervalsDAO, CanceledAppointmentsDAO theCanceledAppointmentsDAO) {
+    public WorkDateIntervalsServiceImpl(WorkDateIntervalsDAO theWorkDateIntervalsDAO, WorkDateIntervalsCanceledAppointmentsManager theWorkDateIntervalsCanceledAppointmentsManager, EmailService theEmailService) {
         workDateIntervalsDAO = theWorkDateIntervalsDAO;
-        canceledAppointmentsDAO = theCanceledAppointmentsDAO;
+        workDateIntervalsCanceledAppointmentsManager = theWorkDateIntervalsCanceledAppointmentsManager;
+        emailService = theEmailService;
     }
 
     public void createIntervals(WorkDate workDate, int interval_minutes) {
@@ -73,7 +80,7 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService {
 
             if(workDateIntervalsEdit.getDescription() != null)
                 canceledAppointment.setDescription(workDateIntervalsEdit.getDescription());
-            canceledAppointmentsDAO.save(canceledAppointment);
+            workDateIntervalsCanceledAppointmentsManager.saveCanceledAppointment(canceledAppointment);
 
             workDateIntervalsEdit.setStudent(null);
             workDateIntervalsEdit.setTaken(false);
@@ -114,5 +121,47 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService {
     @Override
     public List<Pair<LocalTime, LocalTime>> getIntervalsByWorkerIdAndWorkDateId(int workerId, int workDateId) {
         return workDateIntervalsDAO.getIntervalsByWorkerIdAndDate(workerId, workDateId);
+    }
+
+    private Integer deleteInterval(Integer workDateIntervalId) {
+        Optional<WorkDateIntervals> workDateInterval = workDateIntervalsDAO.findById(workDateIntervalId);
+
+        if (workDateInterval.isPresent()) {
+            WorkDateIntervals workDateIntervalDelete = workDateInterval.get();
+            if (workDateIntervalDelete.getTaken()) {
+                Map<String, Object> model = new HashMap<>();
+                model.put("studentNameAndSurname", workDateIntervalDelete.getStudent().getName() + " " + workDateIntervalDelete.getStudent().getSurname());
+                model.put("cancelDate", workDateIntervalDelete.getWorkDate().getDate());
+                model.put("cancelInterval", workDateIntervalDelete.getStartInterval() + " - " + workDateIntervalDelete.getEndInterval());
+
+                try {
+                    emailService.sendEmail(workDateIntervalDelete.getStudent().getLogin().getUsername(), "Appointment cancellation", model, "cancel-appointment");
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            // add canceled interval with description
+            // delete interval
+            return 200;
+        } else {
+            return 401;
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> deleteWorkDate(int id) {
+        if(deleteInterval(id) == 200)
+            return ResponseEntity.ok("Interval deleted");
+        else
+            return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public ResponseEntity<String> deleteListOfWorkDatesIntervals(@RequestBody List<Integer> workDatesIntervalsListId) {
+        if(workDatesIntervalsListId != null) {
+            workDatesIntervalsListId.forEach(this::deleteInterval);
+            return ResponseEntity.ok("Intervals deleted");
+        }
+        return ResponseEntity.noContent().build();
     }
 }
