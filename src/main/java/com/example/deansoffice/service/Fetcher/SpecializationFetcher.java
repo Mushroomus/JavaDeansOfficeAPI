@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Service
 public interface SpecializationFetcher {
-    Optional<Specialization> getSpecializationById(int id);
+    Optional<Specialization> getSpecializationById(Integer id);
 }

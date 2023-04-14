@@ -1,10 +1,15 @@
 package com.example.deansoffice.controller;
 
 import com.example.deansoffice.entity.Login;
+import com.example.deansoffice.entity.MajorYear;
+import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Worker;
 import com.example.deansoffice.model.Role;
+import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.*;
 import com.example.deansoffice.service.LoginAuthenticationJWT.LoginService;
+import com.example.deansoffice.service.Manager.AdminMajorYearManager;
+import com.example.deansoffice.service.Manager.AdminSpecializationMajorYearManager;
 import com.example.deansoffice.service.Utils.PasswordGenerator;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,17 +29,22 @@ import java.util.Optional;
 public class AdminController {
     private WorkerService workerService;
     private LoginService loginService;
-    private SpecializationMajorYearService specializationMajorYearService;
     private PasswordGenerator passwordGenerator;
 
     private EmailService emailService;
 
-    AdminController(@Qualifier("workerServiceImpl") WorkerService theWorkerService, @Qualifier("loginServiceImpl") LoginService theLoginService, @Qualifier("specializationMajorYearServiceImpl") SpecializationMajorYearService theSpecializationMajorYearService, PasswordGenerator thePasswordGenerator, EmailService theEmailService) {
+
+
+    private AdminMajorYearManager adminMajorYearManager;
+    private AdminSpecializationMajorYearManager adminSpecializationMajorYearManager;
+
+    AdminController(@Qualifier("workerServiceImpl") WorkerService theWorkerService, @Qualifier("loginServiceImpl") LoginService theLoginService, AdminMajorYearManager theAdminMajorYearManager, AdminSpecializationMajorYearManager theAdminSpecializationMajorYearManager, PasswordGenerator thePasswordGenerator, EmailService theEmailService) {
         workerService = theWorkerService;
         loginService = theLoginService;
-        specializationMajorYearService = theSpecializationMajorYearService;
         passwordGenerator = thePasswordGenerator;
         emailService = theEmailService;
+        adminMajorYearManager = theAdminMajorYearManager;
+        adminSpecializationMajorYearManager = theAdminSpecializationMajorYearManager;
     }
 
     // add logger to mark what admin done
@@ -104,5 +111,25 @@ public class AdminController {
             response.put("message", e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/{adminId}/major-year")
+    public ResponseEntity<Map<String,String>> addMajorYear(@RequestBody MajorYear majorYear) {
+        return adminMajorYearManager.addMajorYear(majorYear.getYear());
+    }
+
+    @DeleteMapping("/{adminId}/major-year/{yearId}")
+    public ResponseEntity<Map<String,String>> deleteMajorYear(@PathVariable("yearId") Integer yearId) {
+        return adminMajorYearManager.deleteMajorYear(yearId);
+    }
+
+    @PostMapping("/{adminId}/specialization-major-year")
+    public ResponseEntity<Map<String,String>> addSpecializationMajorYear(@RequestBody SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
+        return adminSpecializationMajorYearManager.addSpecializationMajorYear(specializationMajorYearPostRequest);
+    }
+
+    @DeleteMapping("/{adminId}/specialization-major-year/{specializationMajorYearId}")
+    public ResponseEntity<Map<String,String>> deleteSpecializationMajorYear(@PathVariable("specializationMajorYearId") Integer specializationMajorYearId) {
+        return adminSpecializationMajorYearManager.deleteSpecializationMajorYear(specializationMajorYearId);
     }
 }

@@ -24,7 +24,7 @@ public class SpecializationServiceImpl implements SpecializationService, Special
     }
 
     @Override
-    public Optional<Specialization> getSpecializationById(int id) {
+    public Optional<Specialization> getSpecializationById(Integer id) {
         return specializatioDAO.findById(id);
     }
 }
