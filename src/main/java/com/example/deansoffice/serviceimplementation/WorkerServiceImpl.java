@@ -10,6 +10,7 @@ import com.example.deansoffice.model.Pair;
 import com.example.deansoffice.service.*;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
+import com.example.deansoffice.service.Manager.AdminWorkerManager;
 import com.example.deansoffice.service.Manager.WorkerWorkDateIntervalsManager;
 import com.example.deansoffice.service.Manager.WorkerWorkDateManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class WorkerServiceImpl implements WorkerService {
+public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
     private WorkerDAO workerDAO;
 
     private WorkerWorkDateManager workerWorkDateManager;
@@ -62,7 +63,7 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     @Override
-    public void addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList) {
+    public Worker addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList) {
         specializationsIdList.forEach(specializationId -> {
             Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
 
@@ -73,6 +74,7 @@ public class WorkerServiceImpl implements WorkerService {
             }
         });
         workerDAO.save(worker);
+        return worker;
     }
 
     @Override

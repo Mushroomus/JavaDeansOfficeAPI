@@ -17,11 +17,11 @@ public class SpecializationMajorYear {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "specialization_id", referencedColumnName = "id")
     private Specialization specialization;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "major_year_id", referencedColumnName = "id")
     private MajorYear majorYear;
 }

@@ -9,6 +9,4 @@ import java.util.Optional;
 @Service
 public interface LoginService {
     Optional<Login> findByUsername(String username);
-
-    void saveLogin(Login workerLogin);
 }

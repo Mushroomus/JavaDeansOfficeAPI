@@ -39,6 +39,10 @@ public class ErrorHandler {
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("error", "Year with that Specialization already exists");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
+        } else if(message.contains("specialization.name_course_unique")) {
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("error", "Name and Course already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
         } else {
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("error", "Constraint violation occurred");

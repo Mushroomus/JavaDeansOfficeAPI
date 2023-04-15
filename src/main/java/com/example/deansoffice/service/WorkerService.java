@@ -13,11 +13,6 @@ import java.util.Optional;
 @Service
 public interface WorkerService {
     List<WorkerDTO> getWorkers();
-    Optional<Worker> getWorkerById(int id);
-
-    void saveWorker(Worker worker);
-
-    void addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList);
 
     List<String> getWorkDayIntervals(int id, long date);
 
