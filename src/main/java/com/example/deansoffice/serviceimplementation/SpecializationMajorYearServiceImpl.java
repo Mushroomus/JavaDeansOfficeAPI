@@ -7,6 +7,7 @@ import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.Fetcher.MajorYearFetcher;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
+import com.example.deansoffice.service.Fetcher.SpecializationMajorYearFetcher;
 import com.example.deansoffice.service.Manager.AdminSpecializationMajorYearManager;
 import com.example.deansoffice.service.SpecializationMajorYearService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class SpecializationMajorYearServiceImpl implements SpecializationMajorYearService, AdminSpecializationMajorYearManager {
+public class SpecializationMajorYearServiceImpl implements SpecializationMajorYearService, AdminSpecializationMajorYearManager, SpecializationMajorYearFetcher {
 
     private SpecializationMajorYearDAO specializationMajorYearDAO;
     private MajorYearFetcher majorYearFetcher;
@@ -89,5 +90,10 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
             response.put("response", "Specialization with that Year doesn't exist");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+    @Override
+    public Optional<SpecializationMajorYear> getSpecializationMajorYear(Integer id) {
+        return specializationMajorYearDAO.findById(id);
     }
 }

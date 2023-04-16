@@ -6,13 +6,18 @@ import com.example.deansoffice.model.RegisterStudent;
 import com.example.deansoffice.model.Role;
 import com.example.deansoffice.model.TokenType;
 import com.example.deansoffice.service.*;
+import com.example.deansoffice.service.Utils.PasswordValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.deansoffice.model.AuthenticationRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +33,14 @@ public class AuthenticationService {
   private final AuthenticationManager authenticationManager;
 
   @Transactional
-  public AuthenticationResponse register(RegisterStudent registerStudent) {
+  public ResponseEntity<?> register(RegisterStudent registerStudent) {
+
+    if (!PasswordValidator.validatePassword(registerStudent.getPassword())) {
+      Map<String,String> requirementsPassword = new HashMap<>();
+      requirementsPassword.put("error", "Password does not meet the requirements");
+      return ResponseEntity.badRequest().body(requirementsPassword);
+    }
+
     Student student = new Student();
     student.setName(registerStudent.getName());
     student.setSurname(registerStudent.getSurname());
@@ -48,9 +60,11 @@ public class AuthenticationService {
     var jwtToken = jwtService.generateToken(login);
     saveLoginToken(login, jwtToken);
 
-    return AuthenticationResponse.builder()
+    AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
             .token(jwtToken)
             .build();
+
+    return ResponseEntity.ok(authenticationResponse);
   }
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
