@@ -31,7 +31,6 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
     private WorkerWorkDateManager workerWorkDateManager;
 
-
     private WorkerWorkDateIntervalsManager workerWorkDateIntervalsManager;
 
     private SpecializationFetcher specializationFetcher;

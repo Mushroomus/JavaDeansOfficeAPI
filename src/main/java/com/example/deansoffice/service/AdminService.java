@@ -20,6 +20,7 @@ public interface AdminService {
     ResponseEntity<Map<String,String>> deleteSpecialization(Integer specializationId);
     ResponseEntity<Map<String,String>> addSpecializationMajorYear(SpecializationMajorYearPostRequest specializationMajorYearPostRequest);
     ResponseEntity<Map<String,String>> deleteSpecializationMajorYear(Integer specializationMajorYearId);
-    ResponseEntity<Map<String, String>> addSpecializationsToWorker(int adminId, int workerId, List<Integer> specializationsIdList);
-    ResponseEntity<Map<String, String>> createWorker(int adminId, Worker newWorker) throws MessagingException;
+    ResponseEntity<Map<String, String>> addSpecializationsToWorker(int workerId, List<Integer> specializationsIdList);
+    ResponseEntity<Map<String, String>> createWorker(Worker newWorker) throws MessagingException;
+    ResponseEntity<Map<String, String>> deleteSpecializationFromWorker(int workerId, int specializationId);
 }

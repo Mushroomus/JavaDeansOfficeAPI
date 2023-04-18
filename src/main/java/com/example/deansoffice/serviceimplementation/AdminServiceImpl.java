@@ -29,15 +29,18 @@ public class AdminServiceImpl implements AdminService {
     private AdminSpecializationMajorYearManager adminSpecializationMajorYearManager;
     private AdminWorkerManager adminWorkerManager;
     private AdminLoginManager adminLoginManager;
+
+    private AdminWorkerSpecializationManager adminWorkerSpecializationManager;
     private EmailService emailService;
     private PasswordGenerator passwordGenerator;
 
-    AdminServiceImpl(AdminMajorYearManager theAdminMajorYearManager, AdminSpecializationManager theAdminSpecializationManager, AdminSpecializationMajorYearManager theAdminSpecializationMajorYearManager, AdminWorkerManager theAdminWorkerManager, AdminLoginManager theAdminLoginManager, EmailService theEmailService, PasswordGenerator thePasswordGenerator) {
+    AdminServiceImpl(AdminMajorYearManager theAdminMajorYearManager, AdminSpecializationManager theAdminSpecializationManager, AdminSpecializationMajorYearManager theAdminSpecializationMajorYearManager, AdminWorkerManager theAdminWorkerManager, AdminLoginManager theAdminLoginManager, AdminWorkerSpecializationManager theAdminWorkerSpecializationManager, EmailService theEmailService, PasswordGenerator thePasswordGenerator) {
         adminMajorYearManager = theAdminMajorYearManager;
         adminSpecializationManager = theAdminSpecializationManager;
         adminSpecializationMajorYearManager = theAdminSpecializationMajorYearManager;
         adminWorkerManager = theAdminWorkerManager;
         adminLoginManager = theAdminLoginManager;
+        adminWorkerSpecializationManager = theAdminWorkerSpecializationManager;
         emailService = theEmailService;
         passwordGenerator = thePasswordGenerator;
     }
@@ -71,7 +74,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> addSpecializationsToWorker(int adminId, int workerId, List<Integer> specializationsIdList) {
+    public ResponseEntity<Map<String, String>> addSpecializationsToWorker(int workerId, List<Integer> specializationsIdList) {
         Optional<Worker> worker = adminWorkerManager.getWorkerById(workerId);
         Map<String, String> response = new HashMap<>();
         Worker workerChange;
@@ -99,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> createWorker(int adminId, Worker newWorker) throws MessagingException {
+    public ResponseEntity<Map<String, String>> createWorker(Worker newWorker) throws MessagingException {
         Worker worker = Worker.builder()
                 .name(newWorker.getName())
                 .surname(newWorker.getSurname())
@@ -137,5 +140,17 @@ public class AdminServiceImpl implements AdminService {
             response.put("message", "Failed to save");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, String>> deleteSpecializationFromWorker(int workerId, int workerSpecializationId) {
+        Optional<Worker> worker = adminWorkerManager.getWorkerById(workerId);
+        Map<String, String> response = new HashMap<>();
+        if(worker.isEmpty()) {
+            response.put("message", "Worker not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        return adminWorkerSpecializationManager.deleteWorkerSpecialization(workerId, workerSpecializationId);
     }
 }

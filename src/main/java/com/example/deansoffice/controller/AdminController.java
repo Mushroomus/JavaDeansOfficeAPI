@@ -27,12 +27,17 @@ public class AdminController {
     // add logger to mark what admin done
     @PostMapping("/{adminId}/worker")
     public ResponseEntity<Map<String,String>> createWorker(@PathVariable("adminId") int adminId, @RequestBody Worker newWorker) throws MessagingException {
-        return adminService.createWorker(adminId, newWorker);
+        return adminService.createWorker(newWorker);
     }
 
-    @PostMapping("/{adminId}/worker/{workerId}/specializations")
+    @PostMapping("/{adminId}/worker/{workerId}/specialization")
     public ResponseEntity<Map<String,String>> addSpecializationsToWorker(@PathVariable("adminId") int adminId, @PathVariable("workerId") int workerId, @RequestBody List<Integer> specializationsIdList) {
-        return adminService.addSpecializationsToWorker(adminId, workerId, specializationsIdList);
+        return adminService.addSpecializationsToWorker(workerId, specializationsIdList);
+    }
+
+    @DeleteMapping("/{adminId}/worker/{workerId}/specialization/{specializationId}")
+    public ResponseEntity<Map<String,String>> deleteSpecializationFromWorker(@PathVariable("adminId") int adminId, @PathVariable("workerId") int workerId, @PathVariable("specializationId") int specializationId ) {
+        return adminService.deleteSpecializationFromWorker(workerId, specializationId);
     }
 
     @PostMapping("/{adminId}/major-year")
@@ -64,7 +69,6 @@ public class AdminController {
     public ResponseEntity<Map<String,String>> addSpecializationMajorYear(@RequestBody SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
         return adminService.addSpecializationMajorYear(specializationMajorYearPostRequest);
     }
-
 
     @DeleteMapping("/{adminId}/specialization-major-year/{specializationMajorYearId}")
     public ResponseEntity<Map<String,String>> deleteSpecializationMajorYear(@PathVariable("specializationMajorYearId") Integer specializationMajorYearId) {
