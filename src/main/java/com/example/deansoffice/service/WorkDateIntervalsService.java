@@ -17,8 +17,8 @@ public interface WorkDateIntervalsService {
 
     ResponseEntity<String> cancelAppointment(Integer studentId, Integer appointmentId);
 
-    ResponseEntity<List<Object[]>> findByStudentIdAndStartInvervalAndEndInterval(int studentId, String startIntervalString, String endIntervalString,
-                                                                                 LocalDate startDateLong, LocalDate endDateLong, Integer workerId);
+    //ResponseEntity<List<Object[]>> findByStudentIdAndStartInvervalAndEndInterval(int studentId, String startIntervalString, String endIntervalString,
+      //                                                                           LocalDate startDateLong, LocalDate endDateLong, Integer workerId);
     Optional<WorkDateIntervals> findWorkDateIntervalById(Integer workDateIntervalId);
 
     ResponseEntity<String> deleteWorkDate(int id);

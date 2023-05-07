@@ -4,6 +4,14 @@ import com.example.deansoffice.componentaspect.AdminLoggingAspect;
 import com.example.deansoffice.entity.*;
 import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +23,8 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
+@Tag(name = "Admin", description = "API for administrative actions")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminController {
     private AdminService adminService;
     private AdminLoggingAspect adminLoggingAspect;
@@ -36,7 +46,15 @@ public class AdminController {
     }
 
     @DeleteMapping("/{adminId}/worker/{workerId}/specialization/{specializationId}")
-    public ResponseEntity<Map<String,String>> deleteSpecializationFromWorker(@PathVariable("adminId") int adminId, @PathVariable("workerId") int workerId, @PathVariable("specializationId") int specializationId ) {
+    @Operation(summary = "Delete a specialization from a worker",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Specialization deleted",
+                            content = @Content(schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(value = "{\n  \"message\": \"Specialization deleted\"\n}"))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized",
+                            content = @Content(schema = @Schema(implementation = Map.class)))
+            })
+    public ResponseEntity<Map<String,String>> deleteSpecializationFromWorker(@PathVariable("adminId") @Parameter(description="Admin Identifiator") int adminId, @PathVariable("workerId") int workerId, @PathVariable("specializationId") int specializationId ) {
         return adminService.deleteSpecializationFromWorker(workerId, specializationId);
     }
 
