@@ -2,6 +2,10 @@ package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.WorkerSpecializationDAO;
 import com.example.deansoffice.entity.WorkerSpecialization;
+import com.example.deansoffice.exception.AccessForbiddenException;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.Manager.AdminWorkerSpecializationManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +23,17 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> deleteWorkerSpecialization(Integer workerId, Integer workerSpecializationId) {
+    public ResponseEntity<Response> deleteWorkerSpecialization(Integer workerId, Integer workerSpecializationId) {
         Optional<WorkerSpecialization> workerSpecialization = workerSpecializationDAO.findById(workerSpecializationId);
-        Map<String,String> response = new HashMap<>();
 
         if(workerSpecialization.isEmpty()) {
-            response.put("response", "Worker Specialization not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new RecordNotFoundException("Worker specialization not found");
         }
 
         WorkerSpecialization deleteWorkerSpecialization = workerSpecialization.get();
 
         if(deleteWorkerSpecialization.getWorker().getId() != workerId) {
-            response.put("response", "Access forbidden");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            throw new AccessForbiddenException();
         }
 
         deleteWorkerSpecialization.setWorker(null);
@@ -40,11 +41,9 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
         workerSpecializationDAO.delete(deleteWorkerSpecialization);
 
         if(workerSpecializationDAO.findById(workerSpecializationId).isEmpty()) {
-            response.put("response", "Worker Specialization deleted");
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker specialization deleted"));
         } else {
-            response.put("response", "Failed to delete Worker Specialization");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            throw new InternalServerErrorException("Failed to delete worker specialization");
         }
     }
 }

@@ -63,17 +63,21 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
     @Override
     public Worker addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList) {
-        specializationsIdList.forEach(specializationId -> {
-            Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
+        try {
+            specializationsIdList.forEach(specializationId -> {
+                Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
 
-            if(specialization.isPresent()) {
-                worker.getSpecializations().add(specialization.get());
-            } else {
-                throw new SpecializationNotFoundException();
-            }
-        });
-        workerDAO.save(worker);
-        return worker;
+                if (specialization.isPresent()) {
+                    worker.getSpecializations().add(specialization.get());
+                } else {
+                    throw new RecordNotFoundException("Specialization not found");
+                }
+            });
+            workerDAO.save(worker);
+            return worker;
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to add specializations to worker");
+        }
     }
 
     @Override
@@ -94,13 +98,13 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
                             .map(w -> w.getStartInterval().toString() + " - " + w.getEndInterval().toString())
                             .collect(Collectors.toList());
                     } else {
-                        throw new IntervalNotFoundException();
+                        throw new RecordNotFoundException("Interval not found");
                     }
                 } else {
-                    throw new WorkDateNotFoundException();
+                    throw new RecordNotFoundException("Work date not found");
                 }
             } else {
-                throw new WorkerNotFoundException();
+                throw new RecordNotFoundException("Worker not found");
             }
         }
 
@@ -111,7 +115,7 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
             WorkDate workDate = workerWorkDateManager.newWorkDateForUser(worker.get(), request.getDate(), request.getStartTime(), request.getEndTime());
             workerWorkDateIntervalsManager.createIntervals(workDate, Integer.parseInt(interval));
         } else {
-            throw new WorkerNotFoundException();
+            throw new RecordNotFoundException("Worker not found");
         }
     }
 
@@ -122,7 +126,7 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
         if(worker.isPresent()) {
             workerWorkDateManager.newWorkDateForUser(worker.get(), request.getDate(), request.getStartTime(), request.getEndTime());
         } else {
-            throw new WorkerNotFoundException();
+            throw new RecordNotFoundException("Worker not found");
         }
     }
 
@@ -177,7 +181,7 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
         Optional<Student> student = studentFetcher.getStudentById(studentId);
 
         if(!student.isPresent())
-            throw new StudentNotFoundException();
+            throw new RecordNotFoundException("Student not found");
 
         Optional<Worker> worker = workerDAO.findById(workerId);
 
@@ -209,13 +213,13 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
                     workerWorkDateIntervalsManager.saveWorkDateInterval(workDateInterval.get());
                 } else {
-                    throw new IntervalNotFoundException();
+                    throw new RecordNotFoundException("Interval not found");
                 }
             } else {
-                throw new WorkDateNotFoundException();
+                throw new RecordNotFoundException("Work date not found");
             }
         } else {
-            throw new WorkerNotFoundException();
+            throw new RecordNotFoundException("Worker not found");
         }
     }
 }

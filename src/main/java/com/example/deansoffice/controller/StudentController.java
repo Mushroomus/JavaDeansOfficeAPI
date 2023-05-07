@@ -2,9 +2,16 @@ package com.example.deansoffice.controller;
 
 import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.StudentMajorDetails;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.Manager.StudentMajorDetailsManager;
 import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
 import com.example.deansoffice.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,17 +27,21 @@ import java.util.Optional;
 public class StudentController {
 
     private StudentService studentService;
-    private StudentWorkDateIntervalsManager studentWorkDateIntervalsManager;
-    private StudentMajorDetailsManager studentMajorDetailsManager;
 
-    StudentController(StudentService theStudentService, StudentWorkDateIntervalsManager theStudentWorkDateIntervalsManager, StudentMajorDetailsManager theStudentMajorDetailsManager) {
+    StudentController(@Qualifier("studentServiceImpl") StudentService theStudentService) {
         studentService = theStudentService;
-        studentWorkDateIntervalsManager = theStudentWorkDateIntervalsManager;
-        studentMajorDetailsManager = theStudentMajorDetailsManager;
     }
 
     @GetMapping("/{studentId}/appointment/{appointmentId}")
-    private ResponseEntity<String> cancelAppointment(@PathVariable int studentId, @PathVariable int appointmentId) {
+    @Operation(summary = "Cancel Student Appointment",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Get Appointment",
+                            content = @Content(schema = @Schema(implementation = Map.class))),
+                    @ApiResponse(responseCode = "500", description = "Failed to save",
+                            content = @Content(schema = @Schema(implementation = Map.class),
+                            examples = @ExampleObject(value = "{\n  \"message\": \"Failed to save\"\n}"))),
+            })
+    private ResponseEntity<Response> cancelAppointment(@PathVariable int studentId, @PathVariable int appointmentId) {
         return studentService.cancelAppointment(studentId, appointmentId);
     }
 
@@ -49,7 +60,7 @@ public class StudentController {
     }
 
     @PostMapping("/{studentId}/major-details")
-    ResponseEntity<Map<String,String>> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody Map<String,Integer> specializationMajorYearId) {
+    ResponseEntity<Response> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody Map<String,Integer> specializationMajorYearId) {
 
         Integer requestBodyId = null;
         if (!specializationMajorYearId.isEmpty()) {
@@ -59,7 +70,7 @@ public class StudentController {
     }
 
     @PutMapping("/{studentId}/major-details/{studentMajorDetailsId}")
-    ResponseEntity<Map<String,String>> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody Map<String,Integer> majorDetailsId) {
+    ResponseEntity<Response> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody Map<String,Integer> majorDetailsId) {
         Integer requestBodyId = null;
         if (!majorDetailsId.isEmpty()) {
             requestBodyId = majorDetailsId.values().iterator().next();
@@ -68,7 +79,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/{studentId}/major-details/{majorDetailsId}")
-    ResponseEntity<Map<String,String>> deleteMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("majorDetailsId") Integer majorDetailsId) {
+    ResponseEntity<Response> deleteMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("majorDetailsId") Integer majorDetailsId) {
         return studentService.deleteMajorDetails(studentId, majorDetailsId);
     }
 

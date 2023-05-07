@@ -1,31 +1,17 @@
 package com.example.deansoffice.controller;
 
 import com.example.deansoffice.dto.WorkerDTO;
-import com.example.deansoffice.entity.*;
-import com.example.deansoffice.exception.IntervalNotFoundException;
-import com.example.deansoffice.exception.StudentNotFoundException;
-import com.example.deansoffice.exception.WorkDateNotFoundException;
-import com.example.deansoffice.exception.WorkerNotFoundException;
 import com.example.deansoffice.model.NewWorkDayRequest;
 import com.example.deansoffice.model.Pair;
 import com.example.deansoffice.service.*;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.sql.Time;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/workers")

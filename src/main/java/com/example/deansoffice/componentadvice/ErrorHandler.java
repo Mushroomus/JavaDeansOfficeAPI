@@ -1,6 +1,7 @@
 package com.example.deansoffice.componentadvice;
 
 import com.example.deansoffice.exception.*;
+import com.example.deansoffice.model.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,17 +14,30 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ErrorHandler {
+
     @ExceptionHandler(value = {Exception.class})
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse response = new ErrorResponse("Something went wrong");
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Something went wrong"));
     }
 
-    @ExceptionHandler({WorkerNotFoundException.class, WorkDateNotFoundException.class, IntervalNotFoundException.class, UserNotFoundException.class, StudentNotFoundException.class, SpecializationNotFoundException.class})
-    public ResponseEntity<Object> handleWorkerNotFoundException(Exception ex) {
-        String message = ex.getMessage();
-        ErrorResponse errorResponse = new ErrorResponse(message);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @ExceptionHandler({RecordNotFoundException.class})
+    public ResponseEntity<Object> handleRecordNotFoundException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler({InternalServerErrorException.class})
+    public ResponseEntity<Object> handleInternalServerErrorException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler({BadRequestException.class})
+    public ResponseEntity<Object> handleBadRequestException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler({AccessForbiddenException.class})
+    public ResponseEntity<Object> handleAccessForbiddenException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

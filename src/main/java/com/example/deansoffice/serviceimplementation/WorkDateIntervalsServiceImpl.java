@@ -4,7 +4,12 @@ import com.example.deansoffice.dao.WorkDateIntervalsDAO;
 import com.example.deansoffice.entity.CanceledAppointments;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.WorkDateIntervals;
+import com.example.deansoffice.exception.AccessForbiddenException;
+import com.example.deansoffice.exception.BadRequestException;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Pair;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.EmailService;
 import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
 import com.example.deansoffice.service.Manager.WorkDateIntervalsCanceledAppointmentsManager;
@@ -13,6 +18,8 @@ import com.example.deansoffice.service.Utils.LocalTimeFormatter;
 import com.example.deansoffice.service.WorkDateIntervalsService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,10 +73,19 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
     }
 
     @Override
-    public ResponseEntity<String> cancelAppointment(Integer studentId, Integer appointmentId) {
-        Optional<WorkDateIntervals> workDateIntervals = workDateIntervalsDAO.findById(appointmentId);
+    public ResponseEntity<Response> cancelAppointment(Integer studentId, Integer appointmentId) {
 
-        if(workDateIntervals.isPresent() && workDateIntervals.get().getStudent().getId() == studentId) {
+        try {
+            Optional<WorkDateIntervals> workDateIntervals = workDateIntervalsDAO.findById(appointmentId);
+
+            if (workDateIntervals.isEmpty()) {
+                throw new RecordNotFoundException("Appointment not found");
+            }
+
+            if (workDateIntervals.get().getStudent().getId() == studentId) {
+                throw new AccessForbiddenException();
+            }
+
             WorkDateIntervals workDateIntervalsEdit = workDateIntervals.get();
             CanceledAppointments canceledAppointment = new CanceledAppointments();
 
@@ -78,7 +94,7 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
             canceledAppointment.setStartInterval(workDateIntervalsEdit.getStartInterval());
             canceledAppointment.setEndInterval(workDateIntervalsEdit.getEndInterval());
 
-            if(workDateIntervalsEdit.getDescription() != null)
+            if (workDateIntervalsEdit.getDescription() != null)
                 canceledAppointment.setDescription(workDateIntervalsEdit.getDescription());
             workDateIntervalsCanceledAppointmentsManager.saveCanceledAppointment(canceledAppointment);
 
@@ -86,9 +102,11 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
             workDateIntervalsEdit.setTaken(false);
             workDateIntervalsDAO.save(workDateIntervalsEdit);
 
-            return ResponseEntity.ok("Appointment canceled");
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Appointment canceled"));
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to cancel appointment");
         }
-        return ResponseEntity.notFound().build();
+
     }
 
     @Override
@@ -106,10 +124,11 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
             }
 
             List<Object[]> response = workDateIntervalsDAO.findByStudentIdAndStartInvervalAndEndInterval(studentId, startInterval, endInterval, startDate, endDate, workerId);
-            return ResponseEntity.ok(response);
-
-        } catch (DateTimeParseException e) {
-            return  ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch(DateTimeParseException e) {
+            throw new BadRequestException("Failed to parse date");
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to fetch appointments");
         }
     }
 

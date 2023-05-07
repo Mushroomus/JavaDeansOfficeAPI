@@ -5,6 +5,9 @@ import com.example.deansoffice.dao.StudentDAO;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
 import com.example.deansoffice.service.Manager.StudentMajorDetailsManager;
@@ -61,7 +64,7 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     }
 
     @Override
-    public ResponseEntity<String> cancelAppointment(int studentId, int appointmentId) {
+    public ResponseEntity<Response> cancelAppointment(int studentId, int appointmentId) {
         return studentWorkDateIntervalsManager.cancelAppointment(studentId, appointmentId);
     }
     @Override
@@ -70,56 +73,66 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     }
 
     @Override
-    public ResponseEntity<Map<String,String>> addMajorDetails(Integer studentId, Integer specializationMajorYearId) {
-        Optional<Student> studentOptional = studentDAO.findById(studentId);
+    public ResponseEntity<Response> addMajorDetails(Integer studentId, Integer specializationMajorYearId) {
 
-        if(studentOptional.isPresent()) {
-            return studentMajorDetailsManager.addStudentMajorDetails(studentOptional.get(), specializationMajorYearId);
-        } else {
-            Map<String,String> response = new HashMap<>();
-            response.put("response", "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        try {
+            Optional<Student> studentOptional = studentDAO.findById(studentId);
+
+            if (studentOptional.isPresent()) {
+                return studentMajorDetailsManager.addStudentMajorDetails(studentOptional.get(), specializationMajorYearId);
+            } else {
+                throw new RecordNotFoundException("Student not found");
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to add major details to student");
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> deleteMajorDetails(Integer studentId, Integer majorDetailsId) {
-        Optional<Student> studentOptional = studentDAO.findById(studentId);
+    public ResponseEntity<Response> deleteMajorDetails(Integer studentId, Integer majorDetailsId) {
 
-        if(studentOptional.isPresent()) {
-            return studentMajorDetailsManager.deleteStudentMajorDetails(studentOptional.get(), majorDetailsId);
-        } else {
-            Map<String,String> response = new HashMap<>();
-            response.put("response", "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        try {
+            Optional<Student> studentOptional = studentDAO.findById(studentId);
+
+            if (studentOptional.isPresent()) {
+                return studentMajorDetailsManager.deleteStudentMajorDetails(studentOptional.get(), majorDetailsId);
+            } else {
+                throw new RecordNotFoundException("Student not found");
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete major details from student");
         }
     }
 
     @Override
     public ResponseEntity<Map<String, ?>> getStudentSpecializationMajorYear(int studentId) {
-        Optional<Student> studentOptional = studentDAO.findById(studentId);
+        try {
+            Optional<Student> studentOptional = studentDAO.findById(studentId);
 
-        if(studentOptional.isEmpty()) {
-            Map<String, String> response = new HashMap<>();
-            response.put("response", "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } else {
-            Map<String, List<SpecializationMajorYear>> response = new HashMap<>();
-            response.put("majorDetails", studentOptional.get().getSpecializationMajorYears());
-            return ResponseEntity.status(HttpStatus.OK).body(response);
+            if (studentOptional.isEmpty()) {
+                throw new RecordNotFoundException("Student not found");
+            } else {
+                Map<String, List<SpecializationMajorYear>> response = new HashMap<>();
+                response.put("majorDetails", studentOptional.get().getSpecializationMajorYears());
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to fetch student specialization major year");
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> editMajorDetails(Integer studentId, Integer studentMajorDetailsId, Integer requestBodyId) {
-        Optional<Student> studentOptional = studentDAO.findById(studentId);
+    public ResponseEntity<Response> editMajorDetails(Integer studentId, Integer studentMajorDetailsId, Integer requestBodyId) {
+        try {
+            Optional<Student> studentOptional = studentDAO.findById(studentId);
 
-        if(studentOptional.isEmpty()) {
-            Map<String, String> response = new HashMap<>();
-            response.put("response", "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } else {
-            return studentMajorDetailsManager.editStudentMajorDetails(studentOptional.get(), studentMajorDetailsId, requestBodyId);
+            if (studentOptional.isEmpty()) {
+                throw new RecordNotFoundException("Student not found");
+            } else {
+                return studentMajorDetailsManager.editStudentMajorDetails(studentOptional.get(), studentMajorDetailsId, requestBodyId);
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to edit student's major details");
         }
     }
 }

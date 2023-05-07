@@ -3,6 +3,9 @@ package com.example.deansoffice.serviceimplementation;
 import com.example.deansoffice.dao.SpecializationDAO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
 import com.example.deansoffice.service.Manager.AdminSpecializationManager;
 import com.example.deansoffice.service.SpecializationService;
@@ -35,65 +38,48 @@ public class SpecializationServiceImpl implements SpecializationService, AdminSp
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> addSpecialization(Specialization specialization) {
-        Specialization savedSpecialization = specializatioDAO.save(specialization);
-        Map<String, String> response = new HashMap<>();
-
-        if(savedSpecialization.getId() > 0) {
-            response.put("response", "Specialization saved");
-            return ResponseEntity.ok(response);
-        } else {
-            response.put("response", "Failed to save specialization");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    public ResponseEntity<Response> addSpecialization(Specialization specialization) {
+        try {
+            specializatioDAO.save(specialization);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Specialization added"));
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to save specialization");
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> deleteSpecialization(Integer specializationId) {
-        Optional<Specialization> deleteSpecialization = specializatioDAO.findById(specializationId);
-        Map<String,String> response = new HashMap<>();
+    public ResponseEntity<Response> deleteSpecialization(Integer specializationId) {
+        try {
+            Optional<Specialization> deleteSpecialization = specializatioDAO.findById(specializationId);
 
-        if(deleteSpecialization.isPresent()) {
-            specializatioDAO.delete(deleteSpecialization.get());
-            deleteSpecialization = specializatioDAO.findById(specializationId);
-            if(deleteSpecialization.isEmpty()) {
-                response.put("response", "Specialization deleted");
-                return ResponseEntity.status(HttpStatus.OK).body(response);
+            if (deleteSpecialization.isPresent()) {
+                specializatioDAO.delete(deleteSpecialization.get());
+                specializatioDAO.findById(specializationId);
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Specialization deleted"));
             } else {
-                response.put("response", "Something went wrong");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                throw new RecordNotFoundException("Specialization not found");
             }
-        } else {
-            response.put("response", "Specialization doesn't exist");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete specialization");
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> updateSpecialization(Specialization specialization) {
-        Optional<Specialization> specializationOptional = specializatioDAO.findById(specialization.getId());
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Response> updateSpecialization(Specialization specialization) {
+        try {
+            Optional<Specialization> specializationOptional = specializatioDAO.findById(specialization.getId());
 
-        if (specializationOptional.isPresent()) {
-            Specialization existingSpecialization = specializationOptional.get();
-            existingSpecialization.setName(specialization.getName());
-            existingSpecialization.setCourse(specialization.getCourse());
-            specializatioDAO.save(existingSpecialization);
-
-            Optional<Specialization> updatedSpecializationOptional = specializatioDAO.findById(specialization.getId());
-            if (updatedSpecializationOptional.isPresent()) {
-                Specialization updatedSpecialization = updatedSpecializationOptional.get();
-                if (updatedSpecialization.getName().equals(specialization.getName())
-                        && updatedSpecialization.getCourse().equals(specialization.getCourse())) {
-                    response.put("message", "Specialization updated");
-                    return ResponseEntity.ok(response);
-                }
+            if (specializationOptional.isPresent()) {
+                Specialization existingSpecialization = specializationOptional.get();
+                existingSpecialization.setName(specialization.getName());
+                existingSpecialization.setCourse(specialization.getCourse());
+                specializatioDAO.save(existingSpecialization);
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Specialization updated"));
+            } else {
+                throw new RecordNotFoundException("Specialization not found");
             }
-            response.put("message", "Failed to update specialization");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        } else {
-            response.put("message", "Specialization not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to update specialization");
         }
     }
 }

@@ -4,6 +4,9 @@ import com.example.deansoffice.dao.SpecializationMajorYearDAO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
 import com.example.deansoffice.entity.SpecializationMajorYear;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.Fetcher.MajorYearFetcher;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
@@ -39,56 +42,46 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
         return specializationMajorYearDAO.findSpecializationMajorYearByMajorYearIdAndSpecializationId(studentId, specializationMajorYearId);
     }
     @Override
-    public ResponseEntity<Map<String, String>> addSpecializationMajorYear(SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
-        Optional<MajorYear> majorYearOptional = majorYearFetcher.getMajorYearById(specializationMajorYearPostRequest.getMajorYear());
-        Map<String,String> response = new HashMap<>();
+    public ResponseEntity<Response> addSpecializationMajorYear(SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
+        try {
+            Optional<MajorYear> majorYearOptional = majorYearFetcher.getMajorYearById(specializationMajorYearPostRequest.getMajorYear());
 
-        if(majorYearOptional.isEmpty()) {
-            response.put("response", "Year not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+            if (majorYearOptional.isEmpty()) {
+                throw new RecordNotFoundException("Year not found");
+            }
 
-        Optional<Specialization> specializationOptional = specializationFetcher.getSpecializationById(specializationMajorYearPostRequest.getSpecialization());
+            Optional<Specialization> specializationOptional = specializationFetcher.getSpecializationById(specializationMajorYearPostRequest.getSpecialization());
 
-        if(specializationOptional.isEmpty()) {
-            response.put("response", "Specialization not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+            if (specializationOptional.isEmpty()) {
+                throw new RecordNotFoundException("Specialization not found");
+            }
 
-        SpecializationMajorYear addSpecializationMajorYear = SpecializationMajorYear.builder()
-                .majorYear(majorYearOptional.get())
-                .specialization(specializationOptional.get())
-                .build();
+            SpecializationMajorYear addSpecializationMajorYear = SpecializationMajorYear.builder()
+                    .majorYear(majorYearOptional.get())
+                    .specialization(specializationOptional.get())
+                    .build();
 
-        SpecializationMajorYear savedSpecializationMajorYear = specializationMajorYearDAO.save(addSpecializationMajorYear);
-
-        if(savedSpecializationMajorYear.getId() > 0) {
-            response.put("response", "Specialization major year saved");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } else {
-            response.put("response", "Something went wrong");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            specializationMajorYearDAO.save(addSpecializationMajorYear);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Specialization major year added"));
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to add specialization major year");
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, String>> deleteSpecializationMajorYear(Integer specializationMajorYearId) {
-        Optional<SpecializationMajorYear> deleteSpecializationMajorYear = specializationMajorYearDAO.findById(specializationMajorYearId);
-        Map<String,String> response = new HashMap<>();
+    public ResponseEntity<Response> deleteSpecializationMajorYear(Integer specializationMajorYearId) {
+        try {
+            Optional<SpecializationMajorYear> deleteSpecializationMajorYear = specializationMajorYearDAO.findById(specializationMajorYearId);
 
-        if(deleteSpecializationMajorYear.isPresent()) {
-            specializationMajorYearDAO.delete(deleteSpecializationMajorYear.get());
-            deleteSpecializationMajorYear = specializationMajorYearDAO.findById(specializationMajorYearId);
-            if(deleteSpecializationMajorYear.isEmpty()) {
-                response.put("response", "Specialization Major Year deleted");
-                return ResponseEntity.status(HttpStatus.OK).body(response);
+            if (deleteSpecializationMajorYear.isPresent()) {
+                specializationMajorYearDAO.delete(deleteSpecializationMajorYear.get());
+                specializationMajorYearDAO.findById(specializationMajorYearId);
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Specialization major year deleted"));
             } else {
-                response.put("response", "Something went wrong");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                throw new RecordNotFoundException("Specialization major year not found");
             }
-        } else {
-            response.put("response", "Specialization with that Year doesn't exist");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete specialization major year");
         }
     }
 
