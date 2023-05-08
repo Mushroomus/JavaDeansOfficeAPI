@@ -142,45 +142,52 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
         return workDateIntervalsDAO.getIntervalsByWorkerIdAndDate(workerId, workDateId);
     }
 
-    private Integer deleteInterval(Integer workDateIntervalId) {
-        Optional<WorkDateIntervals> workDateInterval = workDateIntervalsDAO.findById(workDateIntervalId);
+    private void deleteInterval(Integer workerId, Integer workDateIntervalId) {
+        try {
+            Optional<WorkDateIntervals> workDateInterval = workDateIntervalsDAO.findById(workDateIntervalId);
 
-        if (workDateInterval.isPresent()) {
-            WorkDateIntervals workDateIntervalDelete = workDateInterval.get();
-            if (workDateIntervalDelete.getTaken()) {
-                Map<String, Object> model = new HashMap<>();
-                model.put("studentNameAndSurname", workDateIntervalDelete.getStudent().getName() + " " + workDateIntervalDelete.getStudent().getSurname());
-                model.put("cancelDate", workDateIntervalDelete.getWorkDate().getDate());
-                model.put("cancelInterval", workDateIntervalDelete.getStartInterval() + " - " + workDateIntervalDelete.getEndInterval());
+            if (workDateInterval.isPresent()) {
+                WorkDateIntervals workDateIntervalDelete = workDateInterval.get();
 
-                try {
-                    emailService.sendEmail(workDateIntervalDelete.getStudent().getLogin().getUsername(), "Appointment cancellation", model, "cancel-appointment");
-                } catch (MessagingException e) {
-                    throw new RuntimeException(e);
+                if(workDateIntervalDelete.getWorkDate().getWorker().getId() != workerId) {
+                    throw new AccessForbiddenException();
                 }
+
+                if (workDateIntervalDelete.getTaken()) {
+                    Map<String, Object> model = new HashMap<>();
+                    model.put("studentNameAndSurname", workDateIntervalDelete.getStudent().getName() + " " + workDateIntervalDelete.getStudent().getSurname());
+                    model.put("cancelDate", workDateIntervalDelete.getWorkDate().getDate());
+                    model.put("cancelInterval", workDateIntervalDelete.getStartInterval() + " - " + workDateIntervalDelete.getEndInterval());
+
+                    try {
+                        emailService.sendEmail(workDateIntervalDelete.getStudent().getLogin().getUsername(), "Appointment cancellation", model, "cancel-appointment");
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                // add canceled interval with description
+                // delete interval
+            } else {
+                throw new RecordNotFoundException("Interval not found");
             }
-            // add canceled interval with description
-            // delete interval
-            return 200;
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to remove interval");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteSingleWorkDateInterval(Integer workerId, Integer workDateIntervalId) {
+       deleteInterval(workerId, workDateIntervalId);
+       return ResponseEntity.status(HttpStatus.OK).body(new Response("Interval deleted"));
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteListOfWorkDatesIntervals(Integer workerId, List<Integer> workDatesIntervalsListId) {
+        if(workDatesIntervalsListId != null && !workDatesIntervalsListId.isEmpty()) {
+            workDatesIntervalsListId.forEach(x-> deleteInterval(workerId, x));
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Intervals deleted"));
         } else {
-            return 401;
+            throw new BadRequestException("Work date interval list is empty");
         }
-    }
-
-    @Override
-    public ResponseEntity<String> deleteWorkDate(int id) {
-        if(deleteInterval(id) == 200)
-            return ResponseEntity.ok("Interval deleted");
-        else
-            return ResponseEntity.notFound().build();
-    }
-
-    @Override
-    public ResponseEntity<String> deleteListOfWorkDatesIntervals(@RequestBody List<Integer> workDatesIntervalsListId) {
-        if(workDatesIntervalsListId != null) {
-            workDatesIntervalsListId.forEach(this::deleteInterval);
-            return ResponseEntity.ok("Intervals deleted");
-        }
-        return ResponseEntity.noContent().build();
     }
 }

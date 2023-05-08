@@ -3,8 +3,10 @@ package com.example.deansoffice.controller;
 import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.model.NewWorkDayRequest;
 import com.example.deansoffice.model.Pair;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.*;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +20,7 @@ import java.util.Map;
 public class WorkerController {
     private WorkerService workerService;
 
-    public WorkerController(WorkerService theWorkerService) {
+    public WorkerController(@Qualifier("workerServiceImpl") WorkerService theWorkerService) {
         workerService = theWorkerService;
     }
 
@@ -26,6 +28,27 @@ public class WorkerController {
     public ResponseEntity<List<WorkerDTO>> getWorkers() {
         List<WorkerDTO> workersDTO = workerService.getWorkers();
         return ResponseEntity.ok(workersDTO);
+    }
+
+    @DeleteMapping("/{workerId}/workdays")
+    public ResponseEntity<Response> deleteListOfWorkDates(@PathVariable int workerId, @RequestBody List<Integer> workDatesListId) {
+        return workerService.deleteListOfWorkDates(workerId, workDatesListId);
+    }
+
+    @DeleteMapping("/{workerId}/workdays/{workdayId}")
+    public ResponseEntity<Response> deleteWorkDate(@PathVariable int workerId, @PathVariable int workdayId) {
+        return workerService.deleteSingleWorkDate(workerId, workdayId);
+    }
+
+
+    @DeleteMapping("/{workderId}/workdate-intervals")
+    public ResponseEntity<Response> deleteListOfWorkDatesIntervals(@PathVariable int workerId, @RequestBody List<Integer> workDatesIntervalsListId) {
+        return workerService.deleteListOfWorkDatesIntervals(workerId, workDatesIntervalsListId);
+    }
+
+    @DeleteMapping("/{workderId}/workdate-intervals/{workdateIntervalId}")
+    public ResponseEntity<Response> deleteSingleWorkDateInterval(@PathVariable int workerId, @PathVariable int workdateIntervalId) {
+        return workerService.deleteSingleWorkDateInterval(workerId, workdateIntervalId);
     }
 
     @GetMapping("/{id}/workdays/{date}/intervals")

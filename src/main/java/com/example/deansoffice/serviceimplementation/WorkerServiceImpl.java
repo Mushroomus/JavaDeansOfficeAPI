@@ -7,6 +7,7 @@ import com.example.deansoffice.entity.*;
 import com.example.deansoffice.exception.*;
 import com.example.deansoffice.model.NewWorkDayRequest;
 import com.example.deansoffice.model.Pair;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.*;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
@@ -14,6 +15,7 @@ import com.example.deansoffice.service.Manager.AdminWorkerManager;
 import com.example.deansoffice.service.Manager.WorkerWorkDateIntervalsManager;
 import com.example.deansoffice.service.Manager.WorkerWorkDateManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -60,6 +62,63 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
     public void saveWorker(Worker worker) {
         workerDAO.save(worker);
     }
+
+    @Override
+    public ResponseEntity<Response> deleteSingleWorkDate(Integer workerId, Integer workdayId) {
+        try {
+            Optional<Worker> worker = workerDAO.findById(workerId);
+
+            if(worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+            return workerWorkDateManager.deleteSingleWorkDate(workerId, workdayId);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteListOfWorkDates(Integer workerId, List<Integer> workDatesListId) {
+        try {
+            Optional<Worker> worker = workerDAO.findById(workerId);
+
+            if(worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+            return workerWorkDateManager.deleteListOfWorkDates(workerId, workDatesListId);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work dates");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteSingleWorkDateInterval(Integer workerId, Integer workdateIntervalId) {
+        try {
+            Optional<Worker> worker = workerDAO.findById(workerId);
+
+            if(worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+            return workerWorkDateIntervalsManager.deleteSingleWorkDateInterval(workerId, workdateIntervalId);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date interval");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteListOfWorkDatesIntervals(Integer workerId, List<Integer> workDatesIntervalsListId) {
+        try {
+            Optional<Worker> worker = workerDAO.findById(workerId);
+
+            if(worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+            return workerWorkDateIntervalsManager.deleteListOfWorkDatesIntervals(workerId,workDatesIntervalsListId);
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date intervals");
+        }
+    }
+
 
     @Override
     public Worker addNewSpecializationsToWorker(Worker worker, List<Integer> specializationsIdList) {

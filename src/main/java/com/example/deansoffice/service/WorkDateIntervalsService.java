@@ -21,8 +21,4 @@ public interface WorkDateIntervalsService {
     //ResponseEntity<List<Object[]>> findByStudentIdAndStartInvervalAndEndInterval(int studentId, String startIntervalString, String endIntervalString,
       //                                                                           LocalDate startDateLong, LocalDate endDateLong, Integer workerId);
     Optional<WorkDateIntervals> findWorkDateIntervalById(Integer workDateIntervalId);
-
-    ResponseEntity<String> deleteWorkDate(int id);
-
-    ResponseEntity<String> deleteListOfWorkDatesIntervals(@RequestBody List<Integer> workDatesIntervalsListId);
 }

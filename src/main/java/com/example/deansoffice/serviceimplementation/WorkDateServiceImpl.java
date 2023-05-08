@@ -3,15 +3,18 @@ package com.example.deansoffice.serviceimplementation;
 import com.example.deansoffice.dao.WorkDateDAO;
 import com.example.deansoffice.entity.WorkDate;
 import com.example.deansoffice.entity.Worker;
+import com.example.deansoffice.exception.AccessForbiddenException;
+import com.example.deansoffice.exception.BadRequestException;
+import com.example.deansoffice.exception.InternalServerErrorException;
+import com.example.deansoffice.exception.RecordNotFoundException;
+import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.EmailService;
 import com.example.deansoffice.service.Manager.WorkerWorkDateManager;
-import com.example.deansoffice.service.WorkDateService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class WorkDateServiceImpl implements WorkDateService, WorkerWorkDateManager {
+public class WorkDateServiceImpl implements  WorkerWorkDateManager {
     private WorkDateDAO workDateDAO;
 
     private EmailService emailService;
@@ -48,45 +51,53 @@ public class WorkDateServiceImpl implements WorkDateService, WorkerWorkDateManag
         return workDateDAO.findById(workDateId);
     }
 
-    private Integer deleteWorkDate(Integer workDateId) {
-        Optional<WorkDate> workDate = workDateDAO.findById(workDateId);
-        if(workDate.isPresent()) {
-            WorkDate workDateDelete = workDate.get();
-            workDateDelete.getWorkDateIntervals().forEach((interval) -> {
+    private void deleteWorkDate(Integer workerId, Integer workDateId) {
+        try {
+            Optional<WorkDate> workDate = workDateDAO.findById(workDateId);
+            if (workDate.isPresent()) {
+                WorkDate workDateDelete = workDate.get();
 
-                if(interval.getTaken()) {
-                    Map<String, Object> model = new HashMap<>();
-                    model.put("studentNameAndSurname", interval.getStudent().getName() + " " + interval.getStudent().getSurname());
-                    model.put("cancelDate", workDateDelete.getDate());
-                    model.put("cancelInterval", interval.getStartInterval() + " - " + interval.getEndInterval());
-
-                    try {
-                        emailService.sendEmail(interval.getStudent().getLogin().getUsername(), "Appointment cancellation", model, "cancel-appointment");
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(e);
-                    }
+                if(workDateDelete.getWorker().getId() != workerId ) {
+                    throw new AccessForbiddenException();
                 }
-                // add canceled interval with description
-                // delete interval
-            });
-            return 200;
+
+                workDateDelete.getWorkDateIntervals().forEach((interval) -> {
+
+                    if (interval.getTaken()) {
+                        Map<String, Object> model = new HashMap<>();
+                        model.put("studentNameAndSurname", interval.getStudent().getName() + " " + interval.getStudent().getSurname());
+                        model.put("cancelDate", workDateDelete.getDate());
+                        model.put("cancelInterval", interval.getStartInterval() + " - " + interval.getEndInterval());
+
+                        try {
+                            emailService.sendEmail(interval.getStudent().getLogin().getUsername(), "Appointment cancellation", model, "cancel-appointment");
+                        } catch (MessagingException e) {
+                            throw new InternalServerErrorException("Error while sending an email");
+                        }
+                    }
+                    // add canceled interval with description
+                    // delete interval
+                });
+            } else {
+                throw new RecordNotFoundException("Work date not found");
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date");
+        }
+    }
+    @Override
+    public ResponseEntity<Response> deleteSingleWorkDate(Integer workerId, Integer workdayId) {
+        deleteWorkDate(workerId, workdayId);
+        return ResponseEntity.status(HttpStatus.OK).body(new Response("Work day deleted"));
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteListOfWorkDates(Integer workerId, List<Integer> workDatesListId) {
+        if(workDatesListId != null && !workDatesListId.isEmpty()) {
+            workDatesListId.forEach(x-> deleteWorkDate(workerId,x));
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Work days deleted"));
         } else {
-            return 401;
+            throw new BadRequestException("List of work dates is empty");
         }
-    }
-    @Override
-    public ResponseEntity<String> deleteSingleWorkDate(int id) {
-        if(deleteWorkDate(id) == 200)
-            return ResponseEntity.ok("Work day deleted");
-        else
-            return ResponseEntity.notFound().build();
-    }
-    @Override
-    public ResponseEntity<String> deleteListOfWorkDates(List<Integer> workDatesListId) {
-        if(workDatesListId != null) {
-            workDatesListId.forEach(this::deleteWorkDate);
-            return ResponseEntity.ok("Work days deleted");
-        }
-        return ResponseEntity.noContent().build();
     }
 }
