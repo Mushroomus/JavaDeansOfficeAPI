@@ -6,7 +6,7 @@ import com.example.deansoffice.dto.SpecializationDTO;
 import com.example.deansoffice.dto.SpecializationMajorYearDTO;
 import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.model.Response;
-import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
+import com.example.deansoffice.record.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

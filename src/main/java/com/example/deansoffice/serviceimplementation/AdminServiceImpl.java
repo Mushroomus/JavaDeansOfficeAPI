@@ -1,6 +1,5 @@
 package com.example.deansoffice.serviceimplementation;
 
-import com.example.deansoffice.componentaspect.AdminLoggingAspect;
 import com.example.deansoffice.dto.MajorYearDTO;
 import com.example.deansoffice.dto.SpecializationDTO;
 import com.example.deansoffice.dto.SpecializationMajorYearDTO;
@@ -14,7 +13,7 @@ import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
-import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
+import com.example.deansoffice.record.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.AdminService;
 import com.example.deansoffice.service.EmailService;
 import com.example.deansoffice.service.Manager.*;

@@ -2,7 +2,7 @@ package com.example.deansoffice.controller;
 
 import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.model.Response;
-import com.example.deansoffice.model.StudentMajorDetailsPostAndPutRequest;
+import com.example.deansoffice.record.StudentMajorDetailsPostAndPutRequest;
 import com.example.deansoffice.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

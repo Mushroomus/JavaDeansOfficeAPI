@@ -8,21 +8,18 @@ import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Response;
-import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
+import com.example.deansoffice.record.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.Fetcher.MajorYearFetcher;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
 import com.example.deansoffice.service.Fetcher.SpecializationMajorYearFetcher;
 import com.example.deansoffice.service.Manager.AdminSpecializationMajorYearManager;
 import com.example.deansoffice.service.SpecializationMajorYearService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

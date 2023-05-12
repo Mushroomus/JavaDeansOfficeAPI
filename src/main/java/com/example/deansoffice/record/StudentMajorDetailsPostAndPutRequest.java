@@ -1,4 +1,4 @@
-package com.example.deansoffice.model;
+package com.example.deansoffice.record;
 
 import java.util.Objects;
 
