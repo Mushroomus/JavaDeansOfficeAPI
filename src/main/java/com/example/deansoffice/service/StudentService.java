@@ -1,5 +1,6 @@
 package com.example.deansoffice.service;
 
+import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
@@ -7,6 +8,7 @@ import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,8 +17,9 @@ import java.util.Optional;
 
 @Service
 public interface StudentService {
+    StudentDTO getStudent(Integer studentId);
     Login addStudent(Student student, String username, String password, Role role);
-
+    ResponseEntity<Response> updateStudent(Integer studentId, Student student);
     ResponseEntity<Response> cancelAppointment(int studentId, int appointmentId);
 
     ResponseEntity<List<Object[]>> getAppointments(int studentId, String startInterval, String endInterval, LocalDate startDate, LocalDate endDate, Integer workerId);

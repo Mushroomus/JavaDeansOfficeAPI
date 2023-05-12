@@ -1,6 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.SpecializationMajorYearDAO;
+import com.example.deansoffice.dto.SpecializationMajorYearDTO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
 import com.example.deansoffice.entity.SpecializationMajorYear;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,16 +43,28 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
     public SpecializationMajorYear findSpecializationMajorYearByMajorYearIdAndSpecializationId(int studentId, int specializationMajorYearId) {
         return specializationMajorYearDAO.findSpecializationMajorYearByMajorYearIdAndSpecializationId(studentId, specializationMajorYearId);
     }
+
+
+    @Override
+    public List<SpecializationMajorYearDTO> getSpecializationMajorYear() {
+        try {
+            List<SpecializationMajorYear> specializationMajorYearEntities = specializationMajorYearDAO.findAll();
+            return SpecializationMajorYearDTO.fromEntities(specializationMajorYearEntities);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get specialization major year");
+        }
+    }
+
     @Override
     public ResponseEntity<Response> addSpecializationMajorYear(SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
         try {
-            Optional<MajorYear> majorYearOptional = majorYearFetcher.getMajorYearById(specializationMajorYearPostRequest.getMajorYear());
+            Optional<MajorYear> majorYearOptional = majorYearFetcher.getMajorYearById(specializationMajorYearPostRequest.majorYear());
 
             if (majorYearOptional.isEmpty()) {
                 throw new RecordNotFoundException("Year not found");
             }
 
-            Optional<Specialization> specializationOptional = specializationFetcher.getSpecializationById(specializationMajorYearPostRequest.getSpecialization());
+            Optional<Specialization> specializationOptional = specializationFetcher.getSpecializationById(specializationMajorYearPostRequest.specialization());
 
             if (specializationOptional.isEmpty()) {
                 throw new RecordNotFoundException("Specialization not found");

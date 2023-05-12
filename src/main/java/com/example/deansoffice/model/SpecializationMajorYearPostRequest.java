@@ -1,13 +1,10 @@
 package com.example.deansoffice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.Objects;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SpecializationMajorYearPostRequest {
-    private Integer specialization;
-    private Integer majorYear;
+public record SpecializationMajorYearPostRequest(Integer specialization, Integer majorYear) {
+    public SpecializationMajorYearPostRequest {
+        Objects.requireNonNull(specialization, "specialization must not be null");
+        Objects.requireNonNull(majorYear, "majorYear must not be null");
+    }
 }

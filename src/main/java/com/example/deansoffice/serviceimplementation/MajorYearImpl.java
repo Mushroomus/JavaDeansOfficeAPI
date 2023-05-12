@@ -1,6 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.MajorYearDAO;
+import com.example.deansoffice.dto.MajorYearDTO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,6 +21,17 @@ public class MajorYearImpl implements AdminMajorYearManager, MajorYearFetcher {
     MajorYearDAO majorYearDAO;
     MajorYearImpl(MajorYearDAO theMajorYearDAO) {
         majorYearDAO = theMajorYearDAO;
+    }
+
+
+    @Override
+    public List<MajorYearDTO> getMajorYears() {
+        try {
+            List<MajorYear> majorYears = majorYearDAO.findAll();
+            return MajorYearDTO.fromEntities(majorYears);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get major years");
+        }
     }
 
     @Override

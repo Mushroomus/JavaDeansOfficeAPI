@@ -1,10 +1,8 @@
 package com.example.deansoffice.controller;
 
-import com.example.deansoffice.entity.SpecializationMajorYear;
-import com.example.deansoffice.entity.StudentMajorDetails;
+import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.model.Response;
-import com.example.deansoffice.service.Manager.StudentMajorDetailsManager;
-import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
+import com.example.deansoffice.model.StudentMajorDetailsPostAndPutRequest;
 import com.example.deansoffice.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,15 +12,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/student")
 public class StudentController {
 
@@ -30,6 +26,16 @@ public class StudentController {
 
     StudentController(@Qualifier("studentServiceImpl") StudentService theStudentService) {
         studentService = theStudentService;
+    }
+
+    @GetMapping("/{studentId}")
+    private StudentDTO getStudent(@PathVariable("studentId") Integer studentId) {
+        return studentService.getStudent(studentId);
+    }
+
+    @PutMapping("/{studentId}")
+    private ResponseEntity<Response> updateStudent(@PathVariable("studentId") Integer studentId, @RequestBody StudentDTO studentDTO) {
+        return studentService.updateStudent(studentId, StudentDTO.toEntity(studentDTO));
     }
 
     @GetMapping("/{studentId}/appointment/{appointmentId}")
@@ -60,22 +66,13 @@ public class StudentController {
     }
 
     @PostMapping("/{studentId}/major-details")
-    ResponseEntity<Response> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody Map<String,Integer> specializationMajorYearId) {
-
-        Integer requestBodyId = null;
-        if (!specializationMajorYearId.isEmpty()) {
-            requestBodyId = specializationMajorYearId.values().iterator().next();
-        }
-        return studentService.addMajorDetails(studentId, requestBodyId);
+    ResponseEntity<Response> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
+        return studentService.addMajorDetails(studentId,  studentMajorDetailsRequest.specializationMajorYearId());
     }
 
     @PutMapping("/{studentId}/major-details/{studentMajorDetailsId}")
-    ResponseEntity<Response> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody Map<String,Integer> majorDetailsId) {
-        Integer requestBodyId = null;
-        if (!majorDetailsId.isEmpty()) {
-            requestBodyId = majorDetailsId.values().iterator().next();
-        }
-        return studentService.editMajorDetails(studentId, studentMajorDetailsId, requestBodyId);
+    ResponseEntity<Response> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
+        return studentService.editMajorDetails(studentId, studentMajorDetailsId, studentMajorDetailsRequest.specializationMajorYearId());
     }
 
     @DeleteMapping("/{studentId}/major-details/{majorDetailsId}")

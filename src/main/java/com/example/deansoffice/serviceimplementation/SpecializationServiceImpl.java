@@ -1,6 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.SpecializationDAO;
+import com.example.deansoffice.dto.SpecializationDTO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
 import com.example.deansoffice.exception.InternalServerErrorException;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,6 +37,17 @@ public class SpecializationServiceImpl implements SpecializationService, AdminSp
     @Override
     public Optional<Specialization> getSpecializationById(Integer id) {
         return specializatioDAO.findById(id);
+    }
+
+
+    @Override
+    public List<SpecializationDTO> getSpecializations() {
+        try {
+            List<Specialization> entitiesSpecialization = specializatioDAO.findAll();
+            return SpecializationDTO.fromEntities(entitiesSpecialization);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get specializations");
+        }
     }
 
     @Override

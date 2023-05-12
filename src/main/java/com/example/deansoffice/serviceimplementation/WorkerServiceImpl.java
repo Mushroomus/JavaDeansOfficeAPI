@@ -1,6 +1,5 @@
 package com.example.deansoffice.serviceimplementation;
 
-import com.example.deansoffice.component.WorkerMapper;
 import com.example.deansoffice.dao.WorkerDAO;
 import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.entity.*;
@@ -38,8 +37,6 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
     private SpecializationFetcher specializationFetcher;
     private StudentFetcher studentFetcher;
 
-    @Autowired
-    private WorkerMapper workerMapper;
 
     @Autowired
     public WorkerServiceImpl(WorkerDAO theWorkerDAO, WorkerWorkDateIntervalsManager theWorkerWorkDateIntervalsManager, WorkerWorkDateManager theWorkerWorkDateManager, SpecializationFetcher theSpecializationFetcher, StudentFetcher theStudentFetcher) {
@@ -50,12 +47,14 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
         studentFetcher = theStudentFetcher;
     }
 
-    public List<WorkerDTO> getWorkers() {
-        return workerMapper.toDTOList(workerDAO.findAll());
-    }
-
     public Optional<Worker> getWorkerById(int id) {
         return workerDAO.findById(id);
+    }
+
+    @Override
+    public List<WorkerDTO> getWorkers() {
+        List<Worker> workerEntities = workerDAO.findAll();
+        return WorkerDTO.fromEntities(workerEntities);
     }
 
     @Override

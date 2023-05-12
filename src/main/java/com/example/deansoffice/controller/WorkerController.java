@@ -24,12 +24,6 @@ public class WorkerController {
         workerService = theWorkerService;
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<WorkerDTO>> getWorkers() {
-        List<WorkerDTO> workersDTO = workerService.getWorkers();
-        return ResponseEntity.ok(workersDTO);
-    }
-
     @DeleteMapping("/{workerId}/workdays")
     public ResponseEntity<Response> deleteListOfWorkDates(@PathVariable int workerId, @RequestBody List<Integer> workDatesListId) {
         return workerService.deleteListOfWorkDates(workerId, workDatesListId);

@@ -1,18 +1,19 @@
 package com.example.deansoffice.dto;
 
-import com.example.deansoffice.entity.MajorYear;
-import com.example.deansoffice.entity.WorkDateIntervals;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
+import com.example.deansoffice.entity.Student;
 
-import java.util.List;
+public record StudentDTO(int id, String name, String surname) {
+    public StudentDTO(Student student) {
+        this(student.getId(), student.getName(), student.getSurname());
+    }
+    public static StudentDTO fromEntity(Student entity) {
+        return new StudentDTO(entity.getId(), entity.getName(), entity.getSurname());
+    }
 
-@Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class StudentDTO {
-    int id;
-    private String name;
-    private String surname;
-    private List<MajorYear> majorYearList;
-    private List<WorkDateIntervals> appointments;
+    public static Student toEntity(StudentDTO dto) {
+        return Student.builder()
+                .name(dto.name)
+                .surname(dto.surname)
+                .build();
+    }
 }

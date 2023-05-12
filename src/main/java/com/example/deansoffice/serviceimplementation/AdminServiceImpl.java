@@ -1,6 +1,10 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.componentaspect.AdminLoggingAspect;
+import com.example.deansoffice.dto.MajorYearDTO;
+import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.SpecializationMajorYearDTO;
+import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
@@ -46,33 +50,51 @@ public class AdminServiceImpl implements AdminService {
         passwordGenerator = thePasswordGenerator;
     }
 
+    @Override
+    public List<MajorYearDTO> getMajorYears() {
+        return adminMajorYearManager.getMajorYears();
+    }
+    @Override
     public ResponseEntity<Response> addMajorYear(MajorYear majorYear) {
         return adminMajorYearManager.addMajorYear(majorYear.getYear());
     }
-
+    @Override
     public ResponseEntity<Response> deleteMajorYear(Integer yearId) {
         return adminMajorYearManager.deleteMajorYear(yearId);
     }
 
+    @Override
+    public List<SpecializationDTO> getSpecializations() {
+        return adminSpecializationManager.getSpecializations();
+    }
+
+    @Override
     public ResponseEntity<Response> addSpecialization(Specialization specialization) {
         return adminSpecializationManager.addSpecialization(specialization);
     }
-
+    @Override
     public ResponseEntity<Response> updateSpecialization(Specialization specialization) {
         return adminSpecializationManager.updateSpecialization(specialization);
     }
-
+    @Override
     public ResponseEntity<Response> deleteSpecialization(Integer specializationId) {
         return adminSpecializationManager.deleteSpecialization(specializationId);
     }
 
+    @Override
+    public List<SpecializationMajorYearDTO> getSpecializationMajorYear() {
+        return adminSpecializationMajorYearManager.getSpecializationMajorYear();
+    }
+
+    @Override
     public ResponseEntity<Response> addSpecializationMajorYear(SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
         return adminSpecializationMajorYearManager.addSpecializationMajorYear(specializationMajorYearPostRequest);
     }
-
+    @Override
     public ResponseEntity<Response> deleteSpecializationMajorYear(Integer specializationMajorYearId) {
         return adminSpecializationMajorYearManager.deleteSpecializationMajorYear(specializationMajorYearId);
     }
+
 
     @Override
     public ResponseEntity<Response> addSpecializationsToWorker(int workerId, List<Integer> specializationsIdList) {
@@ -93,6 +115,11 @@ public class AdminServiceImpl implements AdminService {
             response.put("message", "Specializations added");
             return ResponseEntity.status(HttpStatus.OK).body(new Response("Specializations added to worker"));
         }
+    }
+
+    @Override
+    public List<WorkerDTO> getWorkers() {
+        return adminWorkerManager.getWorkers();
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.example.deansoffice.controller;
 
 import com.example.deansoffice.componentaspect.AdminLoggingAspect;
-import com.example.deansoffice.entity.*;
+import com.example.deansoffice.dto.MajorYearDTO;
+import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.SpecializationMajorYearDTO;
+import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.SpecializationMajorYearPostRequest;
 import com.example.deansoffice.service.*;
@@ -14,15 +17,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 @Tag(name = "Admin", description = "API for administrative actions")
 @SecurityRequirement(name = "bearerAuth")
@@ -30,9 +33,15 @@ public class AdminController {
     private AdminService adminService;
     private AdminLoggingAspect adminLoggingAspect;
 
-    AdminController(AdminService theAdminService, AdminLoggingAspect theAdminLoggingAspect) {
+    AdminController(@Qualifier("adminServiceImpl") AdminService theAdminService, AdminLoggingAspect theAdminLoggingAspect) {
         adminService = theAdminService;
         adminLoggingAspect = theAdminLoggingAspect;
+    }
+
+
+    @GetMapping("/{adminId}/worker")
+    public List<WorkerDTO> getWorkers(@PathVariable("adminId") int adminId) {
+        return adminService.getWorkers();
     }
 
     // add logger to mark what admin done
@@ -46,8 +55,8 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                             examples = @ExampleObject(value = "{\n  \"message\": \"Failed to save\"\n}"))),
             })
-    public ResponseEntity<Response> createWorker(@PathVariable("adminId") int adminId, @RequestBody Worker newWorker) throws MessagingException {
-        return adminService.createWorker(newWorker);
+    public ResponseEntity<Response> createWorker(@PathVariable("adminId") int adminId, @RequestBody WorkerDTO workerDTO) throws MessagingException {
+        return adminService.createWorker(WorkerDTO.toEntity(workerDTO));
     }
 
     @PostMapping("/{adminId}/worker/{workerId}/specialization")
@@ -80,6 +89,12 @@ public class AdminController {
         return adminService.deleteSpecializationFromWorker(workerId, specializationId);
     }
 
+
+    @GetMapping(value = "/{adminId}/major-year")
+    public List<MajorYearDTO> getMajorYears(@PathVariable("adminId") Integer adminId) {
+        return adminService.getMajorYears();
+    }
+
     @PostMapping("/{adminId}/major-year")
     @Operation(summary = "Add new Major Year",
             responses = {
@@ -90,8 +105,8 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                             examples = @ExampleObject(value = "{\n  \"message\": \"Failed to add year\"\n}"))),
             })
-    public ResponseEntity<Response> addMajorYear(@RequestBody MajorYear majorYear) {
-        return adminService.addMajorYear(majorYear);
+    public ResponseEntity<Response> addMajorYear(@PathVariable("adminId") Integer adminId, @RequestBody MajorYearDTO majorYearDTO) {
+        return adminService.addMajorYear(MajorYearDTO.toEntity(majorYearDTO));
     }
 
     @DeleteMapping("/{adminId}/major-year/{yearId}")
@@ -107,8 +122,13 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                             examples = @ExampleObject(value = "{\n  \"message\": \"Failed to delete year\"\n}"))),
             })
-    public ResponseEntity<Response> deleteMajorYear(@PathVariable("yearId") Integer yearId) {
+    public ResponseEntity<Response> deleteMajorYear(@PathVariable("adminId") Integer adminId, @PathVariable("yearId") Integer yearId) {
         return adminService.deleteMajorYear(yearId);
+    }
+
+    @GetMapping(value = "/{adminId}/specialization")
+    public List<SpecializationDTO> getSpecializations(@PathVariable("adminId") Integer adminId) {
+        return adminService.getSpecializations();
     }
 
     @PostMapping("/{adminId}/specialization")
@@ -121,8 +141,8 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                             examples = @ExampleObject(value = "{\n  \"message\": \"Failed to save specialization\"\n}"))),
             })
-    public ResponseEntity<Response> addSpecialization(@RequestBody Specialization specialization) {
-        return adminService.addSpecialization(specialization);
+    public ResponseEntity<Response> addSpecialization(@PathVariable("adminId") Integer adminId, @RequestBody SpecializationDTO specializationDTO) {
+        return adminService.addSpecialization(SpecializationDTO.toEntity(specializationDTO));
     }
 
     @PutMapping("/{adminId}/specialization")
@@ -138,8 +158,8 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                             examples = @ExampleObject(value = "{\n  \"message\": \"Failed to update specialization\"\n}"))),
             })
-    public ResponseEntity<Response> updateSpecialization(@RequestBody Specialization specialization) {
-        return adminService.updateSpecialization(specialization);
+    public ResponseEntity<Response> updateSpecialization(@PathVariable("adminId") Integer adminId, @RequestBody SpecializationDTO specializationDTO) {
+        return adminService.updateSpecialization(SpecializationDTO.toEntity(specializationDTO));
     }
 
     @DeleteMapping("/{adminId}/specialization/{specializationId}")
@@ -155,10 +175,15 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                                     examples = @ExampleObject(value = "{\n  \"message\": \"Failed to delete specialization\"\n}"))),
             })
-    public ResponseEntity<Response> deledeSpecialization(@PathVariable("specializationId") Integer specializationId) {
+    public ResponseEntity<Response> deledeSpecialization(@PathVariable("adminId") Integer adminId, @PathVariable("specializationId") Integer specializationId) {
         return adminService.deleteSpecialization(specializationId);
     }
 
+
+    @GetMapping(value = "/{adminId}/specialization-major-year")
+    public List<SpecializationMajorYearDTO> getSpecializationMajorYear(@PathVariable("adminId") Integer adminId) {
+        return adminService.getSpecializationMajorYear();
+    }
 
     @PostMapping("/{adminId}/specialization-major-year")
     @Operation(summary = "Add Specialization Major Year",
@@ -176,7 +201,7 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                                     examples = @ExampleObject(value = "{\n  \"message\": \"Failed to add specialization major year\"\n}"))),
             })
-    public ResponseEntity<Response> addSpecializationMajorYear(@RequestBody SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
+    public ResponseEntity<Response> addSpecializationMajorYear(@PathVariable("adminId") Integer adminId, @RequestBody SpecializationMajorYearPostRequest specializationMajorYearPostRequest) {
         return adminService.addSpecializationMajorYear(specializationMajorYearPostRequest);
     }
 
@@ -193,7 +218,7 @@ public class AdminController {
                             content = @Content(schema = @Schema(implementation = Map.class),
                                     examples = @ExampleObject(value = "{\n  \"message\": \"Failed to delete specialization major year\"\n}"))),
             })
-    public ResponseEntity<Response> deleteSpecializationMajorYear(@PathVariable("specializationMajorYearId") Integer specializationMajorYearId) {
+    public ResponseEntity<Response> deleteSpecializationMajorYear(@PathVariable("adminId") Integer adminId, @PathVariable("specializationMajorYearId") Integer specializationMajorYearId) {
         return adminService.deleteSpecializationMajorYear(specializationMajorYearId);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
-import com.example.deansoffice.component.StudentMapper;
 import com.example.deansoffice.dao.StudentDAO;
+import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
@@ -30,8 +30,6 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     private StudentWorkDateIntervalsManager studentWorkDateIntervalsManager;
     private StudentMajorDetailsManager studentMajorDetailsManager;
 
-    @Autowired
-    private StudentMapper studentMapper;
 
     @Autowired
     public StudentServiceImpl(StudentDAO theStudentDAO, LoginDAO theLoginDAO, StudentWorkDateIntervalsManager theStudentWorkDateIntervalsManager, StudentMajorDetailsManager theStudentMajorDetailsManager) {
@@ -41,10 +39,20 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
         studentMajorDetailsManager = theStudentMajorDetailsManager;
     }
 
+
+    @Override
+    public StudentDTO getStudent(Integer studentId) {
+        Optional<Student> studentEntity = studentDAO.findById(studentId);
+        if (studentEntity.isEmpty()) {
+            throw new RecordNotFoundException("Student not found");
+        }
+        Student studentExists = studentEntity.get();
+        return new StudentDTO(studentExists.getId(), studentExists.getName(), studentExists.getSurname());
+    }
+
     @Override
     public Login addStudent(Student student, String username, String password, Role role) {
         studentDAO.save(student);
-        System.out.println(student);
 
         Login login = new Login();
         login.setUsername(username);
@@ -57,6 +65,26 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
         loginDAO.save(login);
         return login;
     }
+
+    @Override
+    public ResponseEntity<Response> updateStudent(Integer studentId, Student student) {
+        try {
+            Optional<Student> existingStudent = studentDAO.findById(studentId);
+            if (existingStudent.isEmpty()) {
+                throw new RecordNotFoundException("Student not found");
+            }
+
+            Student updateStudent = existingStudent.get();
+            updateStudent.setName(student.getName());
+            updateStudent.setSurname(student.getSurname());
+            studentDAO.save(updateStudent);
+
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Student updated"));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to update student");
+        }
+    }
+
 
     @Override
     public Optional<Student> getStudentById(int id) {
