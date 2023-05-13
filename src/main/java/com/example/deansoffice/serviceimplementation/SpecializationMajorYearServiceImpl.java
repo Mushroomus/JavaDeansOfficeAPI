@@ -48,7 +48,7 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
             List<SpecializationMajorYear> specializationMajorYearEntities = specializationMajorYearDAO.findAll();
             return SpecializationMajorYearDTO.fromEntities(specializationMajorYearEntities);
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to get specialization major year");
+            throw new InternalServerErrorException("Failed to get specialization major years");
         }
     }
 

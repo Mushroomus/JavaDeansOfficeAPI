@@ -150,9 +150,9 @@ public class AdminServiceImpl implements AdminService {
                     .build();
 
             adminLoginManager.saveLogin(workerLogin);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Worker saved"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Worker created"));
         } catch (MessagingException e) {
-            throw new InternalServerErrorException("Failed to send email to worker");
+            throw new InternalServerErrorException("Failed to send email");
         } catch (Exception e) {
             throw new InternalServerErrorException("Failed to create worker");
         }
@@ -160,12 +160,15 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ResponseEntity<Response> deleteSpecializationFromWorker(int workerId, int workerSpecializationId) {
+        try {
+            Optional<Worker> worker = adminWorkerManager.getWorkerById(workerId);
 
-        Optional<Worker> worker = adminWorkerManager.getWorkerById(workerId);
-
-        if(worker.isEmpty()) {
-            throw new RecordNotFoundException("Worker not found");
+            if (worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+            return adminWorkerSpecializationManager.deleteWorkerSpecialization(workerId, workerSpecializationId);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to delete specialization from worker");
         }
-        return adminWorkerSpecializationManager.deleteWorkerSpecialization(workerId, workerSpecializationId);
     }
 }

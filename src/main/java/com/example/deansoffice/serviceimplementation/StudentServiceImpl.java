@@ -1,14 +1,15 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.StudentDAO;
+import com.example.deansoffice.dto.SpecializationMajorYearDTO;
 import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.entity.Login;
-import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
 import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
+import com.example.deansoffice.record.StudentAppointmentGetResponse;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
 import com.example.deansoffice.service.Manager.StudentMajorDetailsManager;
 import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
@@ -42,12 +43,16 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
 
     @Override
     public StudentDTO getStudent(Integer studentId) {
-        Optional<Student> studentEntity = studentDAO.findById(studentId);
-        if (studentEntity.isEmpty()) {
-            throw new RecordNotFoundException("Student not found");
+        try {
+            Optional<Student> studentEntity = studentDAO.findById(studentId);
+            if (studentEntity.isEmpty()) {
+                throw new RecordNotFoundException("Student not found");
+            }
+            Student studentExists = studentEntity.get();
+            return new StudentDTO(studentExists.getId(), studentExists.getName(), studentExists.getSurname());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get student");
         }
-        Student studentExists = studentEntity.get();
-        return new StudentDTO(studentExists.getId(), studentExists.getName(), studentExists.getSurname());
     }
 
     @Override
@@ -96,7 +101,7 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
         return studentWorkDateIntervalsManager.cancelAppointment(studentId, appointmentId);
     }
     @Override
-    public ResponseEntity<List<Object[]>> getAppointments(int studentId, String startInterval, String endInterval, LocalDate startDate, LocalDate endDate, Integer workerId) {
+    public ResponseEntity<List<StudentAppointmentGetResponse>> getAppointments(int studentId, String startInterval, String endInterval, LocalDate startDate, LocalDate endDate, Integer workerId) {
         return studentWorkDateIntervalsManager.findByStudentIdAndStartInvervalAndEndInterval(studentId, startInterval, endInterval, startDate, endDate, workerId);
     }
 
@@ -133,19 +138,17 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     }
 
     @Override
-    public ResponseEntity<Map<String, ?>> getStudentSpecializationMajorYear(int studentId) {
+    public ResponseEntity<List<SpecializationMajorYearDTO>> getStudentSpecializationMajorYear(int studentId) {
         try {
             Optional<Student> studentOptional = studentDAO.findById(studentId);
 
             if (studentOptional.isEmpty()) {
                 throw new RecordNotFoundException("Student not found");
             } else {
-                Map<String, List<SpecializationMajorYear>> response = new HashMap<>();
-                response.put("majorDetails", studentOptional.get().getSpecializationMajorYears());
-                return ResponseEntity.status(HttpStatus.OK).body(response);
+                return ResponseEntity.status(HttpStatus.OK).body(SpecializationMajorYearDTO.fromEntities(studentOptional.get().getSpecializationMajorYears()));
             }
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to fetch student specialization major year");
+            throw new InternalServerErrorException("Failed to get student specialization major years");
         }
     }
 
@@ -160,7 +163,7 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
                 return studentMajorDetailsManager.editStudentMajorDetails(studentOptional.get(), studentMajorDetailsId, requestBodyId);
             }
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to edit student's major details");
+            throw new InternalServerErrorException("Failed to edit student major details");
         }
     }
 }

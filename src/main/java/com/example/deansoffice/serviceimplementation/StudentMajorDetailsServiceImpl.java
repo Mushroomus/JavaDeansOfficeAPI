@@ -45,7 +45,7 @@ public class StudentMajorDetailsServiceImpl implements StudentMajorDetailsServic
                 studentMajorDetailsDAO.save(studentMajorDetails);
                 return ResponseEntity.status(HttpStatus.OK).body(new Response("Major details added to student"));
             } else {
-                throw new RecordNotFoundException("Specialization Major Year not found");
+                throw new RecordNotFoundException("Specialization major year not found");
             }
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to add major details to student");
@@ -70,7 +70,7 @@ public class StudentMajorDetailsServiceImpl implements StudentMajorDetailsServic
             deleteStudentMajorDetails.setStudent(null);
             studentMajorDetailsDAO.delete(deleteStudentMajorDetails);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new Response("Student major details deleted from student"));
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Major details deleted from student"));
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to delete major details from student");
         }
@@ -100,7 +100,7 @@ public class StudentMajorDetailsServiceImpl implements StudentMajorDetailsServic
             studentMajorDetailsDAO.save(updateStudentMajorDetails);
             return ResponseEntity.status(HttpStatus.OK).body(new Response("Student major details edited"));
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to edit student's major details");
+            throw new InternalServerErrorException("Failed to edit student major details");
         }
     }
 

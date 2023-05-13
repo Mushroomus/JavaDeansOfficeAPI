@@ -55,8 +55,12 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
     @Override
     public List<WorkerDTO> getWorkers() {
-        List<Worker> workerEntities = workerDAO.findAll();
-        return WorkerDTO.fromEntities(workerEntities);
+        try {
+            List<Worker> workerEntities = workerDAO.findAll();
+            return WorkerDTO.fromEntities(workerEntities);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get workers");
+        }
     }
 
     @Override

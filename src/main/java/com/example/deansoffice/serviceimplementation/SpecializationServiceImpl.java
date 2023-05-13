@@ -54,9 +54,9 @@ public class SpecializationServiceImpl implements SpecializationService, AdminSp
     public ResponseEntity<Response> addSpecialization(Specialization specialization) {
         try {
             specializatioDAO.save(specialization);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Specialization added"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Specialization created"));
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to save specialization");
+            throw new InternalServerErrorException("Failed to create specialization");
         }
     }
 

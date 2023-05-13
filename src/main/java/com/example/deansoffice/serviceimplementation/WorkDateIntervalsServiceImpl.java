@@ -10,6 +10,7 @@ import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Pair;
 import com.example.deansoffice.model.Response;
+import com.example.deansoffice.record.StudentAppointmentGetResponse;
 import com.example.deansoffice.service.EmailService;
 import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
 import com.example.deansoffice.service.Manager.WorkDateIntervalsCanceledAppointmentsManager;
@@ -19,10 +20,8 @@ import com.example.deansoffice.service.WorkDateIntervalsService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -110,7 +109,7 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
     }
 
     @Override
-    public ResponseEntity<List<Object[]>> findByStudentIdAndStartInvervalAndEndInterval(int studentId, String startIntervalString, String endIntervalString, LocalDate startDate, LocalDate endDate, Integer workerId) {
+    public ResponseEntity<List<StudentAppointmentGetResponse>> findByStudentIdAndStartInvervalAndEndInterval(int studentId, String startIntervalString, String endIntervalString, LocalDate startDate, LocalDate endDate, Integer workerId) {
 
         LocalTime startInterval = null;
         LocalTime endInterval = null;
@@ -123,12 +122,12 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
                 endInterval = LocalTimeFormatter.parse(endIntervalString);
             }
 
-            List<Object[]> response = workDateIntervalsDAO.findByStudentIdAndStartInvervalAndEndInterval(studentId, startInterval, endInterval, startDate, endDate, workerId);
+            List<StudentAppointmentGetResponse> response = workDateIntervalsDAO.findByStudentIdAndStartInvervalAndEndInterval(studentId, startInterval, endInterval, startDate, endDate, workerId);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch(DateTimeParseException e) {
             throw new BadRequestException("Failed to parse date");
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to fetch appointments");
+            throw new InternalServerErrorException("Failed to get student appointments");
         }
     }
 

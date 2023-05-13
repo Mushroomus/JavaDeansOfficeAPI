@@ -41,9 +41,9 @@ public class MajorYearImpl implements AdminMajorYearManager, MajorYearFetcher {
                     .year(year)
                     .build();
             majorYearDAO.save(majorYear);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Major year added"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Major year created"));
         } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to add year");
+            throw new InternalServerErrorException("Failed to create major year");
         }
     }
 

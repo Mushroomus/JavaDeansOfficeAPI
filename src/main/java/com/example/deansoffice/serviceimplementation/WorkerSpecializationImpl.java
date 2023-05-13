@@ -43,7 +43,7 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
         if(workerSpecializationDAO.findById(workerSpecializationId).isEmpty()) {
             return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker specialization deleted"));
         } else {
-            throw new InternalServerErrorException("Failed to delete worker specialization");
+            throw new InternalServerErrorException("Failed to delete specialization from worker");
         }
     }
 }
