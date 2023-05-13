@@ -14,17 +14,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/worker")
 @Tag(name = "Worker", description = "Endpoints for worker actions")
 @SecurityRequirement(name = "bearerAuth")
 public class WorkerController {
-    private WorkerService workerService;
+    private final WorkerService workerService;
 
     public WorkerController(@Qualifier("workerServiceImpl") WorkerService theWorkerService) {
         workerService = theWorkerService;
@@ -69,7 +64,7 @@ public class WorkerController {
 
 
 
-    @DeleteMapping("/{workderId}/workdate-intervals")
+    @DeleteMapping("/{workerId}/workdate-intervals")
     @Operation(summary = "Delete worker work date intervals",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Worker work day intervals deleted", content = {
@@ -89,7 +84,7 @@ public class WorkerController {
         return workerService.deleteListOfWorkDatesIntervals(workerId, workDatesIntervalsList.listId());
     }
 
-    @DeleteMapping("/{workderId}/workdate-intervals/{workdateIntervalId}")
+    @DeleteMapping("/{workerId}/workdate-intervals/{workdateIntervalId}")
     @Operation(summary = "Delete worker work date interval",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Worker work day interval deleted", content = {

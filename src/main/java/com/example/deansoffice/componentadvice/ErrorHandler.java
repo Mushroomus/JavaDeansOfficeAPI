@@ -16,7 +16,7 @@ import java.util.Map;
 public class ErrorHandler {
 
     @ExceptionHandler(value = {Exception.class})
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGenericException() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Something went wrong"));
     }
 
@@ -43,6 +43,7 @@ public class ErrorHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         Throwable rootCause = ex.getRootCause();
+        assert rootCause != null;
         String message = rootCause.getMessage();
 
         if (message.contains("major_year.year_UNIQUE")) {

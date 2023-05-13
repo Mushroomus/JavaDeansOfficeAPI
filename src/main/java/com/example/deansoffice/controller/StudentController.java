@@ -10,7 +10,6 @@ import com.example.deansoffice.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/student")
@@ -30,7 +28,7 @@ import java.util.Map;
 @SecurityRequirement(name = "bearerAuth")
 public class StudentController {
 
-    private StudentService studentService;
+    private final StudentService studentService;
 
     StudentController(@Qualifier("studentServiceImpl") StudentService theStudentService) {
         studentService = theStudentService;
