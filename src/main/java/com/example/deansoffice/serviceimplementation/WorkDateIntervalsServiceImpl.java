@@ -176,17 +176,25 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
 
     @Override
     public ResponseEntity<Response> deleteSingleWorkDateInterval(Integer workerId, Integer workDateIntervalId) {
-       deleteInterval(workerId, workDateIntervalId);
-       return ResponseEntity.status(HttpStatus.OK).body(new Response("Interval deleted"));
+        try {
+            deleteInterval(workerId, workDateIntervalId);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker work day interval deleted"));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date interval");
+        }
     }
 
     @Override
     public ResponseEntity<Response> deleteListOfWorkDatesIntervals(Integer workerId, List<Integer> workDatesIntervalsListId) {
-        if(workDatesIntervalsListId != null && !workDatesIntervalsListId.isEmpty()) {
-            workDatesIntervalsListId.forEach(x-> deleteInterval(workerId, x));
-            return ResponseEntity.status(HttpStatus.OK).body(new Response("Intervals deleted"));
-        } else {
-            throw new BadRequestException("Work date interval list is empty");
+        try {
+            if (workDatesIntervalsListId != null && !workDatesIntervalsListId.isEmpty()) {
+                workDatesIntervalsListId.forEach(x -> deleteInterval(workerId, x));
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker work day intervals deleted"));
+            } else {
+                throw new BadRequestException("Work date interval list is empty");
+            }
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date intervals");
         }
     }
 }

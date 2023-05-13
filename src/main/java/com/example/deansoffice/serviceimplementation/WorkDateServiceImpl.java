@@ -87,17 +87,25 @@ public class WorkDateServiceImpl implements  WorkerWorkDateManager {
     }
     @Override
     public ResponseEntity<Response> deleteSingleWorkDate(Integer workerId, Integer workdayId) {
-        deleteWorkDate(workerId, workdayId);
-        return ResponseEntity.status(HttpStatus.OK).body(new Response("Work day deleted"));
+        try {
+            deleteWorkDate(workerId, workdayId);
+            return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker work day deleted"));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work date");
+        }
     }
 
     @Override
     public ResponseEntity<Response> deleteListOfWorkDates(Integer workerId, List<Integer> workDatesListId) {
-        if(workDatesListId != null && !workDatesListId.isEmpty()) {
-            workDatesListId.forEach(x-> deleteWorkDate(workerId,x));
-            return ResponseEntity.status(HttpStatus.OK).body(new Response("Work days deleted"));
-        } else {
-            throw new BadRequestException("List of work dates is empty");
+        try {
+            if (workDatesListId != null && !workDatesListId.isEmpty()) {
+                workDatesListId.forEach(x -> deleteWorkDate(workerId, x));
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker work days deleted"));
+            } else {
+                throw new BadRequestException("List of work dates is empty");
+            }
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to delete worker work dates");
         }
     }
 }

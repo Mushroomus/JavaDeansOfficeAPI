@@ -183,12 +183,12 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
             if (worker.isPresent()) {
                 WorkDate workDate = workerWorkDateManager.newWorkDateForUser(worker.get(), request.date(), request.startTime(), request.endTime());
                 workerWorkDateIntervalsManager.createIntervals(workDate, Integer.parseInt(interval));
-                return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Work day with intervals created"));
+                return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Worker work day with intervals created"));
             } else {
                 throw new RecordNotFoundException("Worker not found");
             }
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to create work day with intervals");
+            throw new InternalServerErrorException("Failed to create worker work day with intervals");
         }
     }
 
@@ -199,12 +199,12 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
             if (worker.isPresent()) {
                 workerWorkDateManager.newWorkDateForUser(worker.get(), request.date(), request.startTime(), request.endTime());
-                return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Work day without interval created"));
+                return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Worker work day without intervals created"));
             } else {
                 throw new RecordNotFoundException("Worker not found");
             }
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to create work day without interval");
+            throw new InternalServerErrorException("Failed to create work day without intervals");
         }
     }
 
@@ -228,9 +228,9 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
 
                         for (Pair<LocalTime, LocalTime> existingInterval : existingIntervals) {
                             if ((start.isBefore(existingInterval.getSecond()) && existingInterval.getFirst().isBefore(end))) {
-                                throw new IllegalArgumentException("New interval overlaps with existing interval");
+                                throw new BadRequestException("New interval overlaps with existing interval");
                             } else if ((start.isBefore(workDateStart) || end.isAfter(workDateEnd))) {
-                                throw new IllegalArgumentException("New intervals must be within the working hours of the start and end time");
+                                throw new BadRequestException("New intervals must be within the working hours of the start and end time");
                             }
                         }
                     }
@@ -248,7 +248,7 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
                         workerWorkDateIntervalsManager.saveWorkDateInterval(workDateInterval);
                     }
 
-                    return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Intervals added to work day"));
+                    return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Intervals added to worker work day"));
                 } else {
                     throw new IllegalArgumentException("Work date not found");
                 }
@@ -256,10 +256,11 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
                 throw new IllegalArgumentException("Worker not found");
             }
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add interval to work day");
+            throw new InternalServerErrorException("Failed to add interval to worker work day");
         }
     }
 
+    @Override
     public ResponseEntity<Response> makeAppointment(int workerId, long date, String time, int studentId, Map<String, String> descriptionBody) {
         try {
             Optional<Student> student = studentFetcher.getStudentById(studentId);
