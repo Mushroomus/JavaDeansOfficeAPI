@@ -48,6 +48,7 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
             List<SpecializationMajorYear> specializationMajorYearEntities = specializationMajorYearDAO.findAll();
             return SpecializationMajorYearDTO.fromEntities(specializationMajorYearEntities);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new InternalServerErrorException("Failed to get specialization major years");
         }
     }
@@ -82,11 +83,14 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
     @Override
     public ResponseEntity<Response> deleteSpecializationMajorYear(Integer specializationMajorYearId) {
         try {
-            Optional<SpecializationMajorYear> deleteSpecializationMajorYear = specializationMajorYearDAO.findById(specializationMajorYearId);
+            Optional<SpecializationMajorYear> optionalSpecializationMajorYear = specializationMajorYearDAO.findById(specializationMajorYearId);
 
-            if (deleteSpecializationMajorYear.isPresent()) {
-                specializationMajorYearDAO.delete(deleteSpecializationMajorYear.get());
-                specializationMajorYearDAO.findById(specializationMajorYearId);
+            if (optionalSpecializationMajorYear.isPresent()) {
+                SpecializationMajorYear deleteSpecializationMajorYear = optionalSpecializationMajorYear.get();
+                deleteSpecializationMajorYear.setSpecialization(null);
+                deleteSpecializationMajorYear.setMajorYear(null);
+
+                specializationMajorYearDAO.delete(deleteSpecializationMajorYear);
                 return ResponseEntity.status(HttpStatus.OK).body(new Response("Specialization major year deleted"));
             } else {
                 throw new RecordNotFoundException("Specialization major year not found");

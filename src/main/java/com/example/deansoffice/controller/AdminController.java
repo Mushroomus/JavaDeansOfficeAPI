@@ -38,7 +38,7 @@ public class AdminController {
     }
 
 
-    @GetMapping("/{adminId}/worker")
+    @GetMapping("/{adminId}/workers")
     @Operation(summary = "Get workers", responses = {
             @ApiResponse(responseCode = "200", description = "Success", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = WorkerDTO.class))
@@ -68,7 +68,7 @@ public class AdminController {
         return adminService.createWorker(WorkerDTO.toEntity(workerDTO));
     }
 
-    @PostMapping("/{adminId}/worker/{workerId}/specialization")
+    @PostMapping("/{adminId}/worker/{workerId}/specializations")
     @Operation(summary = "Add specializations to worker", responses = {
             @ApiResponse(responseCode = "200", description = "Specializations added to worker", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
@@ -110,7 +110,7 @@ public class AdminController {
     }
 
 
-    @GetMapping(value = "/{adminId}/major-year")
+    @GetMapping(value = "/{adminId}/major-years")
     @Operation(summary = "Get major years", responses = {
             @ApiResponse(responseCode = "200", description = "Success", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = MajorYearDTO.class))
@@ -153,7 +153,7 @@ public class AdminController {
         return adminService.deleteMajorYear(yearId);
     }
 
-    @GetMapping(value = "/{adminId}/specialization")
+    @GetMapping(value = "/{adminId}/specializations")
     @Operation(summary = "Get specializations", responses = {
             @ApiResponse(responseCode = "200", description = "Success", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = SpecializationDTO.class))
@@ -214,7 +214,7 @@ public class AdminController {
     }
 
 
-    @GetMapping(value = "/{adminId}/specialization-major-year")
+    @GetMapping(value = "/{adminId}/specialization-major-years")
     @Operation(summary = "Get specialization major years", responses = {
             @ApiResponse(responseCode = "200", description = "Success", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = SpecializationMajorYearDTO.class))

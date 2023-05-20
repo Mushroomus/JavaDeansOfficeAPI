@@ -19,6 +19,7 @@ public record SpecializationDTO(int id, String name, String course) {
 
     public static Specialization toEntity(SpecializationDTO dto) {
         return Specialization.builder()
+                .id(dto.id)
                 .name(dto.name)
                 .course(dto.course)
                 .build();

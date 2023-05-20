@@ -92,6 +92,7 @@ public class SpecializationServiceImpl implements SpecializationService, AdminSp
                 throw new RecordNotFoundException("Specialization not found");
             }
         } catch(Exception e) {
+            System.out.println(e.getMessage());
             throw new InternalServerErrorException("Failed to update specialization");
         }
     }

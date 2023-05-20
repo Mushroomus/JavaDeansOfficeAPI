@@ -25,7 +25,7 @@ public class Student {
     @Column(name = "surname")
     private String surname;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(cascade = { CascadeType.REMOVE })
     @JoinTable(
             name = "student_major_details",
             joinColumns = { @JoinColumn(name = "student_id") },
