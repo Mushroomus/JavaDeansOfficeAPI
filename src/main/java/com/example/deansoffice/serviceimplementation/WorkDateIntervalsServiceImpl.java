@@ -16,7 +16,6 @@ import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
 import com.example.deansoffice.service.Manager.WorkDateIntervalsCanceledAppointmentsManager;
 import com.example.deansoffice.service.Manager.WorkerWorkDateIntervalsManager;
 import com.example.deansoffice.service.Utils.LocalTimeFormatter;
-import com.example.deansoffice.service.WorkDateIntervalsService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
-public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, WorkerWorkDateIntervalsManager, StudentWorkDateIntervalsManager {
+public class WorkDateIntervalsServiceImpl implements WorkerWorkDateIntervalsManager, StudentWorkDateIntervalsManager {
     private WorkDateIntervalsDAO workDateIntervalsDAO;
     private WorkDateIntervalsCanceledAppointmentsManager workDateIntervalsCanceledAppointmentsManager;
     private EmailService emailService;
@@ -72,7 +71,7 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
     }
 
     @Override
-    public ResponseEntity<Response> cancelAppointment(Integer studentId, Integer appointmentId) {
+    public ResponseEntity<Response> cancelAppointment(Integer workerId, Integer studentId, Integer appointmentId) {
 
         try {
             Optional<WorkDateIntervals> workDateIntervals = workDateIntervalsDAO.findById(appointmentId);
@@ -81,7 +80,11 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
                 throw new RecordNotFoundException("Appointment not found");
             }
 
-            if (workDateIntervals.get().getStudent().getId() == studentId) {
+            if (studentId != null && workDateIntervals.get().getStudent().getId() == studentId) {
+                throw new AccessForbiddenException();
+            }
+
+            if (workerId != null && workDateIntervals.get().getWorkDate().getWorker().getId() == workerId) {
                 throw new AccessForbiddenException();
             }
 
@@ -105,7 +108,6 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to cancel appointment");
         }
-
     }
 
     @Override
@@ -129,11 +131,6 @@ public class WorkDateIntervalsServiceImpl implements WorkDateIntervalsService, W
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to get student appointments");
         }
-    }
-
-    @Override
-    public Optional<WorkDateIntervals> findWorkDateIntervalById(Integer workDateIntervalId) {
-        return workDateIntervalsDAO.findById(workDateIntervalId);
     }
 
     @Override

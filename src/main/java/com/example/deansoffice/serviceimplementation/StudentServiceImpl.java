@@ -3,16 +3,20 @@ package com.example.deansoffice.serviceimplementation;
 import com.example.deansoffice.dao.StudentDAO;
 import com.example.deansoffice.dto.SpecializationMajorYearDTO;
 import com.example.deansoffice.dto.StudentDTO;
-import com.example.deansoffice.entity.Login;
-import com.example.deansoffice.entity.Student;
+import com.example.deansoffice.dto.WorkerDTO;
+import com.example.deansoffice.entity.*;
 import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
 import com.example.deansoffice.record.StudentAppointmentGetResponse;
+import com.example.deansoffice.record.WorkDayIntervalsGetResponse;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
+import com.example.deansoffice.service.Fetcher.WorkDateFetcher;
+import com.example.deansoffice.service.Fetcher.WorkerFetcher;
 import com.example.deansoffice.service.Manager.StudentMajorDetailsManager;
 import com.example.deansoffice.service.Manager.StudentWorkDateIntervalsManager;
+import com.example.deansoffice.service.Manager.StudentWorkerManager;
 import com.example.deansoffice.service.StudentService;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +25,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.example.deansoffice.dao.LoginDAO;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -30,16 +37,26 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     private LoginDAO loginDAO;
     private StudentWorkDateIntervalsManager studentWorkDateIntervalsManager;
     private StudentMajorDetailsManager studentMajorDetailsManager;
+    private StudentWorkerManager studentWorkerManager;
+    private WorkDateFetcher workDateFetcher;
+    private WorkerFetcher workerFetcher;
 
 
     @Autowired
-    public StudentServiceImpl(StudentDAO theStudentDAO, LoginDAO theLoginDAO, StudentWorkDateIntervalsManager theStudentWorkDateIntervalsManager, StudentMajorDetailsManager theStudentMajorDetailsManager) {
+    public StudentServiceImpl(StudentDAO theStudentDAO, LoginDAO theLoginDAO, StudentWorkDateIntervalsManager theStudentWorkDateIntervalsManager,
+                              StudentMajorDetailsManager theStudentMajorDetailsManager, WorkDateFetcher theWorkDateFetcher, WorkerFetcher theWorkerFetcher) {
         studentDAO = theStudentDAO;
         loginDAO = theLoginDAO;
         studentWorkDateIntervalsManager = theStudentWorkDateIntervalsManager;
         studentMajorDetailsManager = theStudentMajorDetailsManager;
+        workDateFetcher = theWorkDateFetcher;
+        workerFetcher = theWorkerFetcher;
     }
 
+    @Autowired
+    public void setStudentWorkerManager(StudentWorkerManager theStudentWorkerManager) {
+        studentWorkerManager = theStudentWorkerManager;
+    }
 
     @Override
     public StudentDTO getStudent(Integer studentId) {
@@ -98,7 +115,7 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
 
     @Override
     public ResponseEntity<Response> cancelAppointment(int studentId, int appointmentId) {
-        return studentWorkDateIntervalsManager.cancelAppointment(studentId, appointmentId);
+        return studentWorkDateIntervalsManager.cancelAppointment(null, studentId, appointmentId);
     }
     @Override
     public ResponseEntity<List<StudentAppointmentGetResponse>> getAppointments(int studentId, String startInterval, String endInterval, LocalDate startDate, LocalDate endDate, Integer workerId) {
@@ -164,6 +181,83 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
             }
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to edit student major details");
+        }
+    }
+
+    @Override
+    public List<WorkerDTO> getWorkersWithOptionalMatch(Integer studentId, Boolean matchSpecializations) {
+        try {
+            if (matchSpecializations) {
+                List<Integer> studentSpecializationIdList = studentDAO.getStudentSpecializationIdList(studentId);
+                return studentWorkerManager.getWorkersBySpecializations(studentSpecializationIdList);
+            } else {
+                return studentWorkerManager.getWorkers();
+            }
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get workers");
+        }
+    }
+
+    @Override
+    public ResponseEntity<WorkDayIntervalsGetResponse> getWorkerWorkDayIntervals(Integer workerID, long date) {
+        return studentWorkerManager.getWorkDayIntervals(workerID, date);
+    }
+
+    @Override
+    public ResponseEntity<List<LocalDate>> getWorkDays(Integer workerId) {
+        return workDateFetcher.getWorkDates(workerId);
+    }
+
+
+    @Override
+    public ResponseEntity<Response> makeAppointment(int workerId, long date, String time, int studentId, Map<String, String> descriptionBody) {
+        try {
+            Optional<Student> student = studentDAO.findById(studentId);
+
+            if (student.isEmpty())
+                throw new RecordNotFoundException("Student not found");
+
+            Optional<Worker> worker = workerFetcher.getWorkerById(workerId);
+
+            if (worker.isPresent()) {
+
+                LocalDate appointmentDate = Instant.ofEpochMilli(date)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+
+                LocalTime appointmentTime = LocalTime.parse(time);
+
+                Optional<WorkDate> workDate = worker.get().getWorkDates().stream()
+                        .filter(d -> d.getDate().equals(appointmentDate))
+                        .findFirst();
+
+                if (workDate.isPresent()) {
+                    Optional<WorkDateIntervals> workDateInterval = workDate.get().getWorkDateIntervals().stream()
+                            .filter(i -> i.getStartInterval().equals(appointmentTime))
+                            .findFirst();
+
+                    if (workDateInterval.isPresent()) {
+                        WorkDateIntervals interval = workDateInterval.get();
+
+                        interval.setTaken(true);
+                        interval.setStudent(student.get());
+
+                        if (descriptionBody != null)
+                            interval.setDescription(descriptionBody.get("description"));
+
+                        studentWorkDateIntervalsManager.saveWorkDateInterval(workDateInterval.get());
+                        return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Appointment created"));
+                    } else {
+                        throw new RecordNotFoundException("Interval not found");
+                    }
+                } else {
+                    throw new RecordNotFoundException("Work date not found");
+                }
+            } else {
+                throw new RecordNotFoundException("Worker not found");
+            }
+        } catch(Exception e) {
+            throw new InternalServerErrorException("Failed to make an appointment");
         }
     }
 }

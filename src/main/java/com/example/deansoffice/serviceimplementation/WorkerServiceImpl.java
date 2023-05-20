@@ -1,7 +1,9 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.WorkerDAO;
+import com.example.deansoffice.dto.SpecializationDTO;
 import com.example.deansoffice.dto.WorkerDTO;
+import com.example.deansoffice.dto.WorkerSpecializationDTO;
 import com.example.deansoffice.entity.*;
 import com.example.deansoffice.exception.*;
 import com.example.deansoffice.model.*;
@@ -11,9 +13,9 @@ import com.example.deansoffice.record.WorkerWorkDayPostRequest;
 import com.example.deansoffice.service.*;
 import com.example.deansoffice.service.Fetcher.SpecializationFetcher;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
-import com.example.deansoffice.service.Manager.AdminWorkerManager;
-import com.example.deansoffice.service.Manager.WorkerWorkDateIntervalsManager;
-import com.example.deansoffice.service.Manager.WorkerWorkDateManager;
+import com.example.deansoffice.service.Fetcher.WorkDateFetcher;
+import com.example.deansoffice.service.Fetcher.WorkerFetcher;
+import com.example.deansoffice.service.Manager.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,23 +31,31 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
+public class WorkerServiceImpl implements WorkerService, AdminWorkerManager, StudentWorkerManager, WorkerFetcher {
     private WorkerDAO workerDAO;
-
     private WorkerWorkDateManager workerWorkDateManager;
-
     private WorkerWorkDateIntervalsManager workerWorkDateIntervalsManager;
-
     private SpecializationFetcher specializationFetcher;
     private StudentFetcher studentFetcher;
+    private WorkDateFetcher workDateFetcher;
+    private WorkerWorkerSpecializationManager workerWorkerSpecializationManager;
 
 
     @Autowired
-    public WorkerServiceImpl(WorkerDAO theWorkerDAO, WorkerWorkDateIntervalsManager theWorkerWorkDateIntervalsManager, WorkerWorkDateManager theWorkerWorkDateManager, SpecializationFetcher theSpecializationFetcher, StudentFetcher theStudentFetcher) {
+    public WorkerServiceImpl(WorkerDAO theWorkerDAO, WorkerWorkDateIntervalsManager theWorkerWorkDateIntervalsManager,
+                             WorkerWorkDateManager theWorkerWorkDateManager, SpecializationFetcher theSpecializationFetcher,
+                             WorkDateFetcher theWorkDateFetcher, WorkerWorkerSpecializationManager theWorkerWorkerSpecializationManager) {
         workerDAO = theWorkerDAO;
         specializationFetcher = theSpecializationFetcher;
         workerWorkDateManager = theWorkerWorkDateManager;
         workerWorkDateIntervalsManager = theWorkerWorkDateIntervalsManager;
+        workDateFetcher = theWorkDateFetcher;
+        workerWorkerSpecializationManager = theWorkerWorkerSpecializationManager;
+        specializationFetcher = theSpecializationFetcher;
+    }
+
+    @Autowired
+    public void setStudentFetcher(StudentFetcher theStudentFetcher) {
         studentFetcher = theStudentFetcher;
     }
 
@@ -61,6 +71,11 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
         } catch (Exception e) {
             throw new InternalServerErrorException("Failed to get workers");
         }
+    }
+
+    @Override
+    public List<WorkerDTO> getWorkersBySpecializations(List<Integer> specializationIdList) {
+        return workerDAO.getWorkersBySpecializations(specializationIdList);
     }
 
     @Override
@@ -145,6 +160,43 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
     }
 
     @Override
+    public ResponseEntity<List<LocalDate>> getWorkDays(Integer workerId) {
+        return workDateFetcher.getWorkDates(workerId);
+    }
+
+    @Override
+    public ResponseEntity<List<WorkerSpecializationDTO>> getWorkerSpecializations(Integer workerId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(WorkerSpecializationDTO.fromEntities(workerWorkerSpecializationManager.getWorkerSpecializationsByWorker(workerId)));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get worker specializations");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Response> deleteWorkerSpecializationById(Integer workerSpecializationId) {
+        return workerWorkerSpecializationManager.deleteWorkerSpecializationById(workerSpecializationId);
+    }
+
+    @Override
+    public ResponseEntity<Response> addWorkerSpecialization(int workerId, int specializationId) {
+        try {
+            Optional<Worker> worker = workerDAO.findById(workerId);
+            if(worker.isEmpty()) {
+                throw new RecordNotFoundException("Worker not found");
+            }
+
+            Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
+            if(specialization.isEmpty()) {
+                throw new RecordNotFoundException("Specialization not found");
+            }
+            return workerWorkerSpecializationManager.addWorkerSpecialization(worker.get(), specialization.get());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to add specialization to worker");
+        }
+    }
+
+    @Override
     public ResponseEntity<WorkDayIntervalsGetResponse> getWorkDayIntervals(int id, long date) {
         try {
             Optional<Worker> worker = workerDAO.findById(id);
@@ -163,7 +215,7 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
                                 .map(w -> w.getStartInterval().toString() + " - " + w.getEndInterval().toString())
                                 .collect(Collectors.toList())));
                     } else {
-                        throw new RecordNotFoundException("Interval not found");
+                        throw new RecordNotFoundException("Intervals not found");
                     }
                 } else {
                     throw new RecordNotFoundException("Work date not found");
@@ -261,6 +313,11 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
     }
 
     @Override
+    public ResponseEntity<List<SpecializationDTO>> getSpecializations() {
+        return ResponseEntity.status(HttpStatus.OK).body(specializationFetcher.getSpecializations());
+    }
+
+    @Override
     public ResponseEntity<Response> makeAppointment(int workerId, long date, String time, int studentId, Map<String, String> descriptionBody) {
         try {
             Optional<Student> student = studentFetcher.getStudentById(studentId);
@@ -310,5 +367,10 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager {
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to make an appointment");
         }
+    }
+
+    @Override
+    public ResponseEntity<Response> cancelAppointment(Integer workerId, Integer appointmentId) {
+        return workerWorkDateIntervalsManager.cancelAppointment(workerId, null, appointmentId);
     }
 }

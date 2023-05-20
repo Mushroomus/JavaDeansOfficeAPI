@@ -20,6 +20,7 @@ public class AuthenticationController {
   public ResponseEntity<?> register(@RequestBody RegisterStudent request) {
     return service.register(request);
   }
+
   @PostMapping("/login")
   public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
     return ResponseEntity.ok(service.authenticate(request));

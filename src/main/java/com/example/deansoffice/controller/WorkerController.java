@@ -1,9 +1,12 @@
 package com.example.deansoffice.controller;
 
+import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.WorkerSpecializationDTO;
 import com.example.deansoffice.model.*;
 import com.example.deansoffice.record.*;
 import com.example.deansoffice.service.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +16,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/worker")
@@ -46,7 +52,7 @@ public class WorkerController {
     }
 
     @DeleteMapping("/{workerId}/workdays/{workdayId}")
-    @Operation(summary = "Delete worker work dates",
+    @Operation(summary = "Delete worker work date",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Worker work day deleted", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
@@ -191,7 +197,7 @@ public class WorkerController {
     @Transactional
     @Operation(summary = "Make an appointment",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Appointment made", content = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
                     }),
                     @ApiResponse(responseCode = "404", description = "Worker not found", content = {
@@ -206,17 +212,111 @@ public class WorkerController {
                     @ApiResponse(responseCode = "404", description = "Interval not found", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     }),
-                    @ApiResponse(responseCode = "404", description = "New intervals must be within the working hours of the start and end time", content = {
-                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
-                    }),
-                    @ApiResponse(responseCode = "404", description = "Work date not found", content = {
-                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
-                    }),
                     @ApiResponse(responseCode = "500", description = "Failed to make an appointment", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    public ResponseEntity<Response> makeAppointment(@PathVariable int id, @PathVariable long date, @PathVariable String time, @PathVariable int student_id, @RequestBody(required = false) WorkerMakeAppointmentDescriptionPutRequest descriptionBody) {
+    public ResponseEntity<Response> makeAppointment(@PathVariable int id, @PathVariable long date, @PathVariable String time, @PathVariable int student_id, @RequestBody(required = false) MakeAppointmentDescriptionPutRequest descriptionBody) {
         return workerService.makeAppointment(id, date, time, student_id, descriptionBody.description());
     }
+
+    @GetMapping("/{workerId}/appointment/{appointmentId}")
+    @Operation(summary = "Cancel student appointment",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
+                    }),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Appointment not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to cancel appointment", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<Response> cancelAppointment(@PathVariable("workerId") Integer workerId, @PathVariable("appointmentId") Integer appointmentId) {
+        return workerService.cancelAppointment(workerId, appointmentId);
+    }
+
+    @GetMapping("/{workerId}/workdays")
+    @Operation(summary = "Get worker work days",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = LocalDate.class)))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to get worker work dates", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<List<LocalDate>> getWorkDays(@PathVariable("workerId") Integer workerId) {
+        return workerService.getWorkDays(workerId);
+    }
+
+    @GetMapping("/{workerId}/own-specializations")
+    @Operation(summary = "Get worker work days",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = WorkerSpecializationDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to get worker specializations", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<List<WorkerSpecializationDTO>> getWorkerSpecializations(@PathVariable("workerId") Integer workerId) {
+        return workerService.getWorkerSpecializations(workerId);
+    }
+
+    @GetMapping("/{workerId}/specializations")
+    @Operation(summary = "Get specializations",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SpecializationDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to get specializations", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<List<SpecializationDTO>> getSpecializations(@PathVariable("workerId") Integer workerId) {
+        return workerService.getSpecializations();
+    }
+
+    @DeleteMapping("/{workerId}/own-specialization/{workerSpecializationId}")
+    @Operation(summary = "Delete worker specialization",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to delete worker specialization", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<Response> deleteWorkerSpecialization(@PathVariable("workerId") Integer workerId, @PathVariable("workerSpecializationId") Integer workerSpecializationId) {
+        return workerService.deleteWorkerSpecializationById(workerSpecializationId);
+    }
+
+    @PostMapping("/{workerId}/own_specialization/{specializationId}")
+    @Operation(summary = "Add specialization to worker",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
+                    }),
+                    @ApiResponse(responseCode = "400", description = "Worker already has that specialization", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Worker not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Specialization not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to add specialization to worker", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<Response> addWorkerSpecialization(@PathVariable int workerId, @PathVariable int specializationId) {
+        return workerService.addWorkerSpecialization(workerId, specializationId);
+    }
+
 }

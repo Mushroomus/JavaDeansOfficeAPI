@@ -17,4 +17,5 @@ public interface WorkerWorkDateIntervalsManager {
     void saveWorkDateInterval(WorkDateIntervals workDateIntervals);
     ResponseEntity<Response> deleteListOfWorkDatesIntervals(Integer workerId, List<Integer> workDatesIntervalsListId);
     ResponseEntity<Response> deleteSingleWorkDateInterval(Integer workerId, Integer workDateIntervalId);
+    ResponseEntity<Response> cancelAppointment(Integer workerId, Integer studentId, Integer appointmentId);
 }

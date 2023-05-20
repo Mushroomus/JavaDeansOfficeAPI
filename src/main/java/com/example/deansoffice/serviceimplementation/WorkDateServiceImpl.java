@@ -9,6 +9,7 @@ import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.service.EmailService;
+import com.example.deansoffice.service.Fetcher.WorkDateFetcher;
 import com.example.deansoffice.service.Manager.WorkerWorkDateManager;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class WorkDateServiceImpl implements  WorkerWorkDateManager {
+public class WorkDateServiceImpl implements  WorkerWorkDateManager, WorkDateFetcher {
     private WorkDateDAO workDateDAO;
 
     private EmailService emailService;
@@ -44,6 +45,15 @@ public class WorkDateServiceImpl implements  WorkerWorkDateManager {
 
         workDateDAO.save(workDate);
         return workDate;
+    }
+
+    @Override
+    public ResponseEntity<List<LocalDate>> getWorkDates(Integer workerId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(workDateDAO.getWorkDatesGreaterThanCurrentDate(workerId));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get worker work dates");
+        }
     }
 
     @Override

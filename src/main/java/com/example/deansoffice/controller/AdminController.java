@@ -111,7 +111,7 @@ public class AdminController {
 
 
     @GetMapping(value = "/{adminId}/major-year")
-    @Operation(summary = "Get workers", responses = {
+    @Operation(summary = "Get major years", responses = {
             @ApiResponse(responseCode = "200", description = "Success", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = MajorYearDTO.class))
             }),
