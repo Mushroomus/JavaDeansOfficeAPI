@@ -2,6 +2,7 @@ package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.WorkerDAO;
 import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.dto.WorkerSpecializationDTO;
 import com.example.deansoffice.entity.*;
@@ -365,5 +366,14 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager, Stu
     @Override
     public ResponseEntity<Response> cancelAppointment(Integer workerId, Integer appointmentId) {
         return workerWorkDateIntervalsManager.cancelAppointment(workerId, null, appointmentId);
+    }
+
+    @Override
+    public ResponseEntity<List<StudentDTO>> getStudents() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(StudentDTO.fromEntities(studentFetcher.getStudents()));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get students");
+        }
     }
 }

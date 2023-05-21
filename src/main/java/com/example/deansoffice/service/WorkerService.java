@@ -1,6 +1,7 @@
 package com.example.deansoffice.service;
 
 import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.StudentDTO;
 import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.dto.WorkerSpecializationDTO;
 import com.example.deansoffice.model.*;
@@ -33,4 +34,5 @@ public interface WorkerService {
     ResponseEntity<Response> deleteWorkerSpecializationById(Integer workerSpecializationId);
     ResponseEntity<Response> addWorkerSpecialization(int workerId, int specializationId);
     ResponseEntity<Response> cancelAppointment(Integer workerId, Integer appointmentId);
+    ResponseEntity<List<StudentDTO>> getStudents();
 }

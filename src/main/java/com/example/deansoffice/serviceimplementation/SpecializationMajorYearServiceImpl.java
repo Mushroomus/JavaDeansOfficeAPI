@@ -1,6 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.SpecializationMajorYearDAO;
+import com.example.deansoffice.dto.MajorDetailsDTO;
 import com.example.deansoffice.dto.SpecializationMajorYearDTO;
 import com.example.deansoffice.entity.MajorYear;
 import com.example.deansoffice.entity.Specialization;
@@ -103,5 +104,10 @@ public class SpecializationMajorYearServiceImpl implements SpecializationMajorYe
     @Override
     public Optional<SpecializationMajorYear> getSpecializationMajorYear(Integer id) {
         return specializationMajorYearDAO.findById(id);
+    }
+
+    @Override
+    public List<SpecializationMajorYear> getSpecializationMajorYears() {
+        return specializationMajorYearDAO.findAll();
     }
 }

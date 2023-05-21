@@ -1,9 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.StudentDAO;
-import com.example.deansoffice.dto.SpecializationMajorYearDTO;
-import com.example.deansoffice.dto.StudentDTO;
-import com.example.deansoffice.dto.WorkerDTO;
+import com.example.deansoffice.dto.*;
 import com.example.deansoffice.entity.*;
 import com.example.deansoffice.exception.InternalServerErrorException;
 import com.example.deansoffice.exception.RecordNotFoundException;
@@ -11,6 +9,7 @@ import com.example.deansoffice.model.Response;
 import com.example.deansoffice.model.Role;
 import com.example.deansoffice.record.StudentAppointmentGetResponse;
 import com.example.deansoffice.record.WorkDayIntervalsGetResponse;
+import com.example.deansoffice.service.Fetcher.SpecializationMajorYearFetcher;
 import com.example.deansoffice.service.Fetcher.StudentFetcher;
 import com.example.deansoffice.service.Fetcher.WorkDateFetcher;
 import com.example.deansoffice.service.Fetcher.WorkerFetcher;
@@ -40,17 +39,20 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     private StudentWorkerManager studentWorkerManager;
     private WorkDateFetcher workDateFetcher;
     private WorkerFetcher workerFetcher;
+    private SpecializationMajorYearFetcher specializationMajorYearFetcher;
 
 
     @Autowired
     public StudentServiceImpl(StudentDAO theStudentDAO, LoginDAO theLoginDAO, StudentWorkDateIntervalsManager theStudentWorkDateIntervalsManager,
-                              StudentMajorDetailsManager theStudentMajorDetailsManager, WorkDateFetcher theWorkDateFetcher, WorkerFetcher theWorkerFetcher) {
+                              StudentMajorDetailsManager theStudentMajorDetailsManager, WorkDateFetcher theWorkDateFetcher,
+                              WorkerFetcher theWorkerFetcher, SpecializationMajorYearFetcher theSpecializationMajorYearFetcher) {
         studentDAO = theStudentDAO;
         loginDAO = theLoginDAO;
         studentWorkDateIntervalsManager = theStudentWorkDateIntervalsManager;
         studentMajorDetailsManager = theStudentMajorDetailsManager;
         workDateFetcher = theWorkDateFetcher;
         workerFetcher = theWorkerFetcher;
+        specializationMajorYearFetcher = theSpecializationMajorYearFetcher;
     }
 
     @Autowired
@@ -114,6 +116,11 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
     }
 
     @Override
+    public List<Student> getStudents() {
+        return studentDAO.findAll();
+    }
+
+    @Override
     public ResponseEntity<Response> cancelAppointment(int studentId, int appointmentId) {
         return studentWorkDateIntervalsManager.cancelAppointment(null, studentId, appointmentId);
     }
@@ -166,6 +173,15 @@ public class StudentServiceImpl implements StudentService, StudentFetcher {
             }
         } catch(Exception e) {
             throw new InternalServerErrorException("Failed to get student specialization major years");
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<SpecializationMajorYearDTO>> getSpecializationMajorYear() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(SpecializationMajorYearDTO.fromEntities(specializationMajorYearFetcher.getSpecializationMajorYears()));
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get specialization major years");
         }
     }
 

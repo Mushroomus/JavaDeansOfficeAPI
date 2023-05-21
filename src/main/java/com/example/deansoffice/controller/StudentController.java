@@ -1,8 +1,6 @@
 package com.example.deansoffice.controller;
 
-import com.example.deansoffice.dto.SpecializationMajorYearDTO;
-import com.example.deansoffice.dto.StudentDTO;
-import com.example.deansoffice.dto.WorkerDTO;
+import com.example.deansoffice.dto.*;
 import com.example.deansoffice.model.ErrorResponse;
 import com.example.deansoffice.model.Response;
 import com.example.deansoffice.record.StudentAppointmentGetResponse;
@@ -32,10 +30,24 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class StudentController {
 
-    private final StudentService studentService;
+    private StudentService studentService;
 
     StudentController(@Qualifier("studentServiceImpl") StudentService theStudentService) {
-        studentService = theStudentService;
+        this.studentService = theStudentService;
+    }
+
+    @GetMapping("/{studentId}/major-details")
+    @Operation(summary = "Get students",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SpecializationMajorYearDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to get specialization major years", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<List<SpecializationMajorYearDTO>> getStudentMajorDetails(@PathVariable("studentId") Integer studentId) {
+        return studentService.getSpecializationMajorYear();
     }
 
     @GetMapping("/{studentId}/workers")
@@ -48,7 +60,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private List<WorkerDTO> getWorkers(@PathVariable("studentId") Integer studentId, @RequestParam(value = "matchSpecializations", defaultValue = "false") String matchSpecializations) {
+    public List<WorkerDTO> getWorkers(@PathVariable("studentId") Integer studentId, @RequestParam(value = "matchSpecializations", defaultValue = "false") String matchSpecializations) {
         return studentService.getWorkersWithOptionalMatch(studentId, !matchSpecializations.equals("false"));
     }
 
@@ -115,7 +127,7 @@ public class StudentController {
             })
     public ResponseEntity<Response> makeAppointment(@PathVariable("studentId") Integer studentId, @PathVariable("workerId") Integer workerId,
                                                     @PathVariable long date, @PathVariable String time, @RequestBody(required = false) MakeAppointmentDescriptionPutRequest descriptionBody) {
-        return studentService.makeAppointment(workerId, date, time, studentId, descriptionBody.description());
+        return studentService.makeAppointment(workerId, date, time, studentId, descriptionBody != null ? descriptionBody.description() : null);
     }
 
     @GetMapping("/{studentId}")
@@ -131,7 +143,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private StudentDTO getStudent(@PathVariable("studentId") Integer studentId) {
+    public StudentDTO getStudent(@PathVariable("studentId") Integer studentId) {
         return studentService.getStudent(studentId);
     }
 
@@ -148,7 +160,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private ResponseEntity<Response> updateStudent(@PathVariable("studentId") Integer studentId, @RequestBody StudentDTO studentDTO) {
+    public ResponseEntity<Response> updateStudent(@PathVariable("studentId") Integer studentId, @RequestBody StudentDTO studentDTO) {
         return studentService.updateStudent(studentId, StudentDTO.toEntity(studentDTO));
     }
 
@@ -168,7 +180,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private ResponseEntity<Response> cancelAppointment(@PathVariable int studentId, @PathVariable int appointmentId) {
+    public ResponseEntity<Response> cancelAppointment(@PathVariable int studentId, @PathVariable int appointmentId) {
         return studentService.cancelAppointment(studentId, appointmentId);
     }
 
@@ -185,7 +197,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private ResponseEntity<List<StudentAppointmentGetResponse>> getAppointments(@PathVariable int studentId,
+    public ResponseEntity<List<StudentAppointmentGetResponse>> getAppointments(@PathVariable int studentId,
                                                            @RequestParam(required = false) String startInterval, @RequestParam(required = false) String endInterval,
                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
@@ -193,7 +205,7 @@ public class StudentController {
         return studentService.getAppointments(studentId, startInterval, endInterval, startDate, endDate, workerId);
     }
 
-    @GetMapping("/{studentId}/major-details")
+    @GetMapping("/{studentId}/own-major-details")
     @Operation(summary = "Get student major details",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Success", content = {
@@ -206,11 +218,11 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    private ResponseEntity<List<SpecializationMajorYearDTO>> getStudentSpecializationMajorYear(@PathVariable("studentId") int studentId) {
+    public ResponseEntity<List<SpecializationMajorYearDTO>> getStudentSpecializationMajorYear(@PathVariable("studentId") int studentId) {
         return studentService.getStudentSpecializationMajorYear(studentId);
     }
 
-    @PostMapping("/{studentId}/major-details")
+    @PostMapping("/{studentId}/own-major-details")
     @Operation(summary = "Add major details to student",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Major details added to student", content = {
@@ -226,10 +238,11 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    ResponseEntity<Response> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
+    public ResponseEntity<Response> addMajorDetails(@PathVariable("studentId") Integer studentId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
         return studentService.addMajorDetails(studentId,  studentMajorDetailsRequest.specializationMajorYearId());
     }
 
+    /*
     @PutMapping("/{studentId}/major-details/{studentMajorDetailsId}")
     @Operation(summary = "Edit student major details",
             responses = {
@@ -249,11 +262,12 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    ResponseEntity<Response> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
+    public ResponseEntity<Response> editMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("studentMajorDetailsId") Integer studentMajorDetailsId, @RequestBody StudentMajorDetailsPostAndPutRequest studentMajorDetailsRequest) {
         return studentService.editMajorDetails(studentId, studentMajorDetailsId, studentMajorDetailsRequest.specializationMajorYearId());
     }
+     */
 
-    @DeleteMapping("/{studentId}/major-details/{majorDetailsId}")
+    @DeleteMapping("/{studentId}/own-major-details/{majorDetailsId}")
     @Operation(summary = "Delete major details from student",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Major details deleted from student", content = {
@@ -269,7 +283,7 @@ public class StudentController {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
             })
-    ResponseEntity<Response> deleteMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("majorDetailsId") Integer majorDetailsId) {
+    public ResponseEntity<Response> deleteMajorDetails(@PathVariable("studentId") Integer studentId, @PathVariable("majorDetailsId") Integer majorDetailsId) {
         return studentService.deleteMajorDetails(studentId, majorDetailsId);
     }
 }

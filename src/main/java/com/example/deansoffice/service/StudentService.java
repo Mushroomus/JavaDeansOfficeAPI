@@ -1,8 +1,6 @@
 package com.example.deansoffice.service;
 
-import com.example.deansoffice.dto.SpecializationMajorYearDTO;
-import com.example.deansoffice.dto.StudentDTO;
-import com.example.deansoffice.dto.WorkerDTO;
+import com.example.deansoffice.dto.*;
 import com.example.deansoffice.entity.Login;
 import com.example.deansoffice.entity.Student;
 import com.example.deansoffice.model.Response;
@@ -26,6 +24,7 @@ public interface StudentService {
     ResponseEntity<Response> addMajorDetails(Integer studentId, Integer specializationMajorYearId);
     ResponseEntity<Response> deleteMajorDetails(Integer studentId, Integer majorDetailsId);
     ResponseEntity<List<SpecializationMajorYearDTO>> getStudentSpecializationMajorYear(int studentId);
+    ResponseEntity<List<SpecializationMajorYearDTO>> getSpecializationMajorYear();
     ResponseEntity<Response> editMajorDetails(Integer studentId, Integer studentMajorDetailsId, Integer requestBodyId);
     List<WorkerDTO> getWorkersWithOptionalMatch(Integer studentId, Boolean matchSpecializations);
     ResponseEntity<WorkDayIntervalsGetResponse> getWorkerWorkDayIntervals(Integer workerID, long date);

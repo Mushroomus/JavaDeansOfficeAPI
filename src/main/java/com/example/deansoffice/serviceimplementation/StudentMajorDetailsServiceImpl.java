@@ -1,6 +1,7 @@
 package com.example.deansoffice.serviceimplementation;
 
 import com.example.deansoffice.dao.StudentMajorDetailsDAO;
+import com.example.deansoffice.dto.StudentMajorDetailsDTO;
 import com.example.deansoffice.entity.SpecializationMajorYear;
 import com.example.deansoffice.entity.Student;
 import com.example.deansoffice.entity.StudentMajorDetails;
@@ -16,8 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -107,5 +107,11 @@ public class StudentMajorDetailsServiceImpl implements StudentMajorDetailsServic
     @Override
     public void addStudentMajorDetails(StudentMajorDetails studentMajorDetails) {
         studentMajorDetailsDAO.save(studentMajorDetails);
+    }
+
+    @Override
+    public List<StudentMajorDetailsDTO> getStudentMajorDetails(Student student) {
+        List<StudentMajorDetails> studentMajorDetailsList = studentMajorDetailsDAO.findAllByStudent(student);
+        return StudentMajorDetailsDTO.fromEntities(studentMajorDetailsList);
     }
 }

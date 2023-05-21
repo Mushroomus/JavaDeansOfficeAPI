@@ -1,6 +1,8 @@
 package com.example.deansoffice.controller;
 
 import com.example.deansoffice.dto.SpecializationDTO;
+import com.example.deansoffice.dto.StudentDTO;
+import com.example.deansoffice.dto.WorkerDTO;
 import com.example.deansoffice.dto.WorkerSpecializationDTO;
 import com.example.deansoffice.model.*;
 import com.example.deansoffice.record.*;
@@ -31,8 +33,20 @@ public class WorkerController {
         workerService = theWorkerService;
     }
 
+    @GetMapping("/{workerId}/students")
+    @Operation(summary = "Get students",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Success", content = {
+                            @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = WorkerDTO.class)))
+                    }),
+                    @ApiResponse(responseCode = "500", description = "Failed to get students", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    })
+            })
+    public ResponseEntity<List<StudentDTO>> getStudents() {
+        return workerService.getStudents();
+    }
 
-    // get Students
 
     @DeleteMapping("/{workerId}/workdays")
     @Operation(summary = "Delete worker work dates",
