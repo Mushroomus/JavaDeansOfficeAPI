@@ -1,7 +1,6 @@
 FROM maven:3.8.3-openjdk-17 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY . /app/
 
 FROM openjdk:17-alpine
 WORKDIR /app
