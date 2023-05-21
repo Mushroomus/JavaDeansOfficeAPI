@@ -55,8 +55,14 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
     @Override
     public ResponseEntity<Response> deleteWorkerSpecializationById(Integer workerSpecializationId) {
         try {
-            workerSpecializationDAO.deleteById(workerSpecializationId);
-            return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker specialization deleted"));
+            Optional<WorkerSpecialization> workerSpecialization = workerSpecializationDAO.findById(workerSpecializationId);
+            if(workerSpecialization.isPresent()) {
+                workerSpecialization.get().setWorker(null);
+                workerSpecializationDAO.deleteById(workerSpecializationId);
+                return ResponseEntity.status(HttpStatus.OK).body(new Response("Worker specialization deleted"));
+            } else {
+                throw new RecordNotFoundException("Worker specialization not found");
+            }
         } catch (Exception e) {
             throw new InternalServerErrorException("Failed to delete worker specialization");
         }
@@ -64,8 +70,10 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
 
     @Override
     public ResponseEntity<Response> addWorkerSpecialization(Worker worker, Specialization specialization) {
-        try {
-            if (workerSpecializationDAO.existsByWorkerAndSpecialization(worker, specialization)) {
+        //try {
+            boolean workerHasSpecialization = workerSpecializationDAO.existsByWorkerAndSpecialization(worker, specialization);
+            System.out.println(workerHasSpecialization);
+            if (!workerHasSpecialization) {
                 WorkerSpecialization addWorkerSpecialization = WorkerSpecialization
                         .builder()
                         .worker(worker)
@@ -73,12 +81,15 @@ public class WorkerSpecializationImpl implements AdminWorkerSpecializationManage
                         .build();
                 workerSpecializationDAO.save(addWorkerSpecialization);
                 return ResponseEntity.status(HttpStatus.CREATED).body(new Response("Specialization added to worker"));
-            } else {
-                throw new BadRequestException("Worker already has that specialization");
             }
+            throw new BadRequestException("Worker already has that specialization");
+            /*
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new InternalServerErrorException("Failed to add specialization to worker");
         }
+
+             */
     }
 
     @Override

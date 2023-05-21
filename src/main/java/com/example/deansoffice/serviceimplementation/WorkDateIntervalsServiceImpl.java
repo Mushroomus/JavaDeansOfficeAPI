@@ -72,42 +72,37 @@ public class WorkDateIntervalsServiceImpl implements WorkerWorkDateIntervalsMana
 
     @Override
     public ResponseEntity<Response> cancelAppointment(Integer workerId, Integer studentId, Integer appointmentId) {
+        Optional<WorkDateIntervals> workDateIntervals = workDateIntervalsDAO.findById(appointmentId);
 
-        try {
-            Optional<WorkDateIntervals> workDateIntervals = workDateIntervalsDAO.findById(appointmentId);
-
-            if (workDateIntervals.isEmpty()) {
-                throw new RecordNotFoundException("Appointment not found");
-            }
-
-            if (studentId != null && workDateIntervals.get().getStudent().getId() == studentId) {
-                throw new AccessForbiddenException();
-            }
-
-            if (workerId != null && workDateIntervals.get().getWorkDate().getWorker().getId() == workerId) {
-                throw new AccessForbiddenException();
-            }
-
-            WorkDateIntervals workDateIntervalsEdit = workDateIntervals.get();
-            CanceledAppointments canceledAppointment = new CanceledAppointments();
-
-            canceledAppointment.setStudent(workDateIntervalsEdit.getStudent());
-            canceledAppointment.setWorkDate(workDateIntervalsEdit.getWorkDate());
-            canceledAppointment.setStartInterval(workDateIntervalsEdit.getStartInterval());
-            canceledAppointment.setEndInterval(workDateIntervalsEdit.getEndInterval());
-
-            if (workDateIntervalsEdit.getDescription() != null)
-                canceledAppointment.setDescription(workDateIntervalsEdit.getDescription());
-            workDateIntervalsCanceledAppointmentsManager.saveCanceledAppointment(canceledAppointment);
-
-            workDateIntervalsEdit.setStudent(null);
-            workDateIntervalsEdit.setTaken(false);
-            workDateIntervalsDAO.save(workDateIntervalsEdit);
-
-            return ResponseEntity.status(HttpStatus.OK).body(new Response("Appointment canceled"));
-        } catch(Exception e) {
-            throw new InternalServerErrorException("Failed to cancel appointment");
+        if (workDateIntervals.isEmpty()) {
+            throw new RecordNotFoundException("Appointment not found");
         }
+
+        if (studentId != null && workDateIntervals.get().getStudent().getId() != studentId) {
+            throw new AccessForbiddenException();
+        }
+
+        if (workerId != null && workDateIntervals.get().getWorkDate().getWorker().getId() != workerId) {
+            throw new AccessForbiddenException();
+        }
+
+        WorkDateIntervals workDateIntervalsEdit = workDateIntervals.get();
+        CanceledAppointments canceledAppointment = new CanceledAppointments();
+
+        canceledAppointment.setStudent(workDateIntervalsEdit.getStudent());
+        canceledAppointment.setWorkDate(workDateIntervalsEdit.getWorkDate());
+        canceledAppointment.setStartInterval(workDateIntervalsEdit.getStartInterval());
+        canceledAppointment.setEndInterval(workDateIntervalsEdit.getEndInterval());
+
+        if (workDateIntervalsEdit.getDescription() != null)
+            canceledAppointment.setDescription(workDateIntervalsEdit.getDescription());
+        workDateIntervalsCanceledAppointmentsManager.saveCanceledAppointment(canceledAppointment);
+
+        workDateIntervalsEdit.setStudent(null);
+        workDateIntervalsEdit.setTaken(false);
+        workDateIntervalsDAO.save(workDateIntervalsEdit);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new Response("Appointment canceled"));
     }
 
     @Override
@@ -161,8 +156,7 @@ public class WorkDateIntervalsServiceImpl implements WorkerWorkDateIntervalsMana
                         throw new RuntimeException(e);
                     }
                 }
-                // add canceled interval with description
-                // delete interval
+                workDateIntervalsDAO.deleteById(workDateIntervalId);
             } else {
                 throw new RecordNotFoundException("Interval not found");
             }

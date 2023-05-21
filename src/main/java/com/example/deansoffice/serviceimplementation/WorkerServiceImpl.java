@@ -180,51 +180,44 @@ public class WorkerServiceImpl implements WorkerService, AdminWorkerManager, Stu
 
     @Override
     public ResponseEntity<Response> addWorkerSpecialization(int workerId, int specializationId) {
-        try {
-            Optional<Worker> worker = workerDAO.findById(workerId);
-            if(worker.isEmpty()) {
-                throw new RecordNotFoundException("Worker not found");
-            }
-
-            Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
-            if(specialization.isEmpty()) {
-                throw new RecordNotFoundException("Specialization not found");
-            }
-            return workerWorkerSpecializationManager.addWorkerSpecialization(worker.get(), specialization.get());
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to add specialization to worker");
+        Optional<Worker> worker = workerDAO.findById(workerId);
+        if(worker.isEmpty()) {
+            throw new RecordNotFoundException("Worker not found");
         }
+
+        Optional<Specialization> specialization = specializationFetcher.getSpecializationById(specializationId);
+        if(specialization.isEmpty()) {
+            throw new RecordNotFoundException("Specialization not found");
+        }
+        return workerWorkerSpecializationManager.addWorkerSpecialization(worker.get(), specialization.get());
     }
 
     @Override
     public ResponseEntity<WorkDayIntervalsGetResponse> getWorkDayIntervals(int id, long date) {
-        try {
-            Optional<Worker> worker = workerDAO.findById(id);
-            if (worker.isPresent()) {
-                LocalDate convertedDate = Instant.ofEpochMilli(date)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-                Optional<WorkDate> workDate = worker.get().getWorkDates().stream()
-                        .filter(d -> d.getDate().equals(convertedDate))
-                        .findFirst();
-                if (workDate.isPresent()) {
-                    List<WorkDateIntervals> workDateIntervalsList = workDate.get().getWorkDateIntervals();
-                    if (workDateIntervalsList != null) {
-                        return ResponseEntity.status(HttpStatus.OK).body(new WorkDayIntervalsGetResponse(workDateIntervalsList.stream()
-                                .filter(w -> !w.getTaken())
-                                .map(w -> w.getStartInterval().toString() + " - " + w.getEndInterval().toString())
-                                .collect(Collectors.toList())));
-                    } else {
-                        throw new RecordNotFoundException("Intervals not found");
-                    }
+        Optional<Worker> worker = workerDAO.findById(id);
+        if (worker.isPresent()) {
+            LocalDate convertedDate = Instant.ofEpochMilli(date)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            System.out.println(convertedDate);
+            Optional<WorkDate> workDate = worker.get().getWorkDates().stream()
+                    .filter(d -> d.getDate().equals(convertedDate))
+                    .findFirst();
+            if (workDate.isPresent()) {
+                List<WorkDateIntervals> workDateIntervalsList = workDate.get().getWorkDateIntervals();
+                if (workDateIntervalsList != null) {
+                    return ResponseEntity.status(HttpStatus.OK).body(new WorkDayIntervalsGetResponse(workDateIntervalsList.stream()
+                            .filter(w -> !w.getTaken())
+                            .map(w -> w.getStartInterval().toString() + " - " + w.getEndInterval().toString())
+                            .collect(Collectors.toList())));
                 } else {
-                    throw new RecordNotFoundException("Work date not found");
+                    throw new RecordNotFoundException("Intervals not found");
                 }
             } else {
-                throw new RecordNotFoundException("Worker not found");
+                throw new RecordNotFoundException("Work date not found");
             }
-        } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to get work day intervals");
+        } else {
+            throw new RecordNotFoundException("Worker not found");
         }
     }
     @Override

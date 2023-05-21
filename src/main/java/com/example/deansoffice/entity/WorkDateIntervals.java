@@ -26,11 +26,11 @@ public class WorkDateIntervals {
     @Column(name="description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.REMOVE })
     @JoinColumn(name = "work_date_id", referencedColumnName = "id")
     private WorkDate workDate;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.REMOVE })
     @JoinColumn(name = "student_id", referencedColumnName = "id")
     private Student student;
 }

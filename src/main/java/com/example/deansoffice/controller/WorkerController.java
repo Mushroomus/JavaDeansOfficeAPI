@@ -31,6 +31,9 @@ public class WorkerController {
         workerService = theWorkerService;
     }
 
+
+    // get Students
+
     @DeleteMapping("/{workerId}/workdays")
     @Operation(summary = "Delete worker work dates",
             responses = {
@@ -51,7 +54,7 @@ public class WorkerController {
         return workerService.deleteListOfWorkDates(workerId, workDatesList.listId());
     }
 
-    @DeleteMapping("/{workerId}/workdays/{workdayId}")
+    @DeleteMapping("/{workerId}/workday/{workdayId}")
     @Operation(summary = "Delete worker work date",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Worker work day deleted", content = {
@@ -67,8 +70,6 @@ public class WorkerController {
     public ResponseEntity<Response> deleteWorkDate(@PathVariable int workerId, @PathVariable int workdayId) {
         return workerService.deleteSingleWorkDate(workerId, workdayId);
     }
-
-
 
     @DeleteMapping("/{workerId}/workdate-intervals")
     @Operation(summary = "Delete worker work date intervals",
@@ -90,7 +91,7 @@ public class WorkerController {
         return workerService.deleteListOfWorkDatesIntervals(workerId, workDatesIntervalsList.listId());
     }
 
-    @DeleteMapping("/{workerId}/workdate-intervals/{workdateIntervalId}")
+    @DeleteMapping("/{workerId}/workdate-interval/{workdateIntervalId}")
     @Operation(summary = "Delete worker work date interval",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Worker work day interval deleted", content = {
@@ -168,7 +169,7 @@ public class WorkerController {
 
     // Add custom intervals to workday
     @PostMapping("/{workerId}/workdays/{workDayId}/intervals")
-    @Operation(summary = "Get worker work date intervals",
+    @Operation(summary = "Add custom worker work date intervals",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Intervals added to worker work day", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
@@ -217,7 +218,7 @@ public class WorkerController {
                     })
             })
     public ResponseEntity<Response> makeAppointment(@PathVariable int id, @PathVariable long date, @PathVariable String time, @PathVariable int student_id, @RequestBody(required = false) MakeAppointmentDescriptionPutRequest descriptionBody) {
-        return workerService.makeAppointment(id, date, time, student_id, descriptionBody.description());
+        return workerService.makeAppointment(id, date, time, student_id, descriptionBody != null ? descriptionBody.description() : null);
     }
 
     @GetMapping("/{workerId}/appointment/{appointmentId}")
@@ -255,7 +256,7 @@ public class WorkerController {
     }
 
     @GetMapping("/{workerId}/own-specializations")
-    @Operation(summary = "Get worker work days",
+    @Operation(summary = "Get worker specializations",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Success", content = {
                             @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = WorkerSpecializationDTO.class)))
@@ -288,6 +289,9 @@ public class WorkerController {
                     @ApiResponse(responseCode = "200", description = "Success", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = Response.class))
                     }),
+                    @ApiResponse(responseCode = "404", description = "Worker specialization not found", content = {
+                            @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+                    }),
                     @ApiResponse(responseCode = "500", description = "Failed to delete worker specialization", content = {
                             @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
                     })
@@ -296,7 +300,7 @@ public class WorkerController {
         return workerService.deleteWorkerSpecializationById(workerSpecializationId);
     }
 
-    @PostMapping("/{workerId}/own_specialization/{specializationId}")
+    @PostMapping("/{workerId}/own-specialization/{specializationId}")
     @Operation(summary = "Add specialization to worker",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Success", content = {

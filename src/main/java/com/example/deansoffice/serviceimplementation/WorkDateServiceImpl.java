@@ -85,9 +85,8 @@ public class WorkDateServiceImpl implements  WorkerWorkDateManager, WorkDateFetc
                             throw new InternalServerErrorException("Error while sending an email");
                         }
                     }
-                    // add canceled interval with description
-                    // delete interval
                 });
+                workDateDAO.deleteById(workDateId);
             } else {
                 throw new RecordNotFoundException("Work date not found");
             }
