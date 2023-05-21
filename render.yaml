@@ -1,4 +1,0 @@
-name: deansoffice
-type: service
-buildCommand: mvn package -DskipTests
-startCommand: java -jar target/deansoffice-0.0.1-SNAPSHOT.jar
