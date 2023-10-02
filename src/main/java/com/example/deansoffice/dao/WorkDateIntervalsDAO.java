@@ -24,7 +24,7 @@ import java.util.Map;
 @RepositoryRestResource(exported = false)
 public interface WorkDateIntervalsDAO extends JpaRepository<WorkDateIntervals, Integer> {
 
-    @Query("SELECT new com.example.deansoffice.record.StudentAppointmentGetResponse(wd.date, wdi.startInterval, wdi.endInterval, wdi.description, w.name, w.surname) " +
+    @Query("SELECT new com.example.deansoffice.record.StudentAppointmentGetResponse(wdi.id, wd.date, wdi.startInterval, wdi.endInterval, wdi.description, w.name, w.surname) " +
             "FROM WorkDateIntervals wdi " +
             "JOIN wdi.workDate wd " +
             "JOIN wd.worker w " +

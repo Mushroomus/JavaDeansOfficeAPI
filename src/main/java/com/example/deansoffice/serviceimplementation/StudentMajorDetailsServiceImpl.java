@@ -53,12 +53,19 @@ public class StudentMajorDetailsServiceImpl implements StudentMajorDetailsServic
     }
 
     @Override
-    public ResponseEntity<Response> deleteStudentMajorDetails(Student student, Integer studentMajorDetailsId) {
+    public ResponseEntity<Response> deleteStudentMajorDetails(Student student, Integer majorDetailsId) {
         try {
-            Optional<StudentMajorDetails> optionalStudentMajorDetails = studentMajorDetailsDAO.findById(studentMajorDetailsId);
+            Optional<SpecializationMajorYear> majorDetails = specializationMajorYearFetcher.getSpecializationMajorYear(majorDetailsId);
 
-            if (optionalStudentMajorDetails.isEmpty()) {
+            if(majorDetails.isEmpty()) {
                 throw new RecordNotFoundException("Major details not found");
+            }
+
+            Optional<StudentMajorDetails> optionalStudentMajorDetails =
+                    studentMajorDetailsDAO.findByStudentAndSpecializationMajorYear(student, majorDetails.get());
+
+            if (!optionalStudentMajorDetails.isPresent()) {
+                throw new RecordNotFoundException("Student major details not found");
             }
 
             if (optionalStudentMajorDetails.get().getStudent().getId() != student.getId()) {
