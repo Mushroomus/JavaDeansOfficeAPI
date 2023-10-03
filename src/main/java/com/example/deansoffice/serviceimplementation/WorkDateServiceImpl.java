@@ -50,7 +50,7 @@ public class WorkDateServiceImpl implements  WorkerWorkDateManager, WorkDateFetc
     @Override
     public ResponseEntity<List<LocalDate>> getWorkDates(Integer workerId) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(workDateDAO.getWorkDatesGreaterThanCurrentDate(workerId));
+            return ResponseEntity.status(HttpStatus.OK).body(workDateDAO.getWorkDatesGreaterThanCurrentDateAndNotTakenInterval(workerId));
         } catch (Exception e) {
             throw new InternalServerErrorException("Failed to get worker work dates");
         }

@@ -80,6 +80,7 @@ public class AuthenticationService {
     revokeAllLoginTokens(login);
     saveLoginToken(login, jwtToken);
     return AuthenticationResponse.builder()
+        .id(login.getId())
         .token(jwtToken)
         .role(login.getRole().toString())
         .build();
