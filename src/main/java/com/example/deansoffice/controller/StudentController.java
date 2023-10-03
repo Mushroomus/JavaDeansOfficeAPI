@@ -147,6 +147,19 @@ public class StudentController {
         return studentService.getStudent(studentId);
     }
 
+    @GetMapping("/{studentId}/specialization-major-year")
+    @Operation(summary = "Get specialization major years", responses = {
+            @ApiResponse(responseCode = "200", description = "Success", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = SpecializationMajorYearDTO.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Failed to get specialization major years", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public ResponseEntity<List<SpecializationMajorYearDTO>> getSpecializationMajorYear(@PathVariable("studentId") Integer studentId) {
+        return studentService.getSpecializationMajorYear();
+    }
+
     @PutMapping("/{studentId}")
     @Operation(summary = "Update student",
             responses = {
